@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Object Permanence Task</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2C3E50;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .task-area {
+            position: relative;
+            height: 300px;
+            background: #F0F8FF;
+            border: 3px solid #4169E1;
+            border-radius: 15px;
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .cat {
+            font-size: 4rem;
+            animation: bounce 2s infinite;
+            transition: all 0.5s ease;
+            cursor: default;
+        }
+
+        .box {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: #8B4513;
+            border: 4px solid #654321;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .box::before {
+            content: "📦";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+        }
+
+        .instructions {
+            font-size: 1.2rem;
+            color: #34495E;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .prompt {
+            background: #FFE4B5;
+            border: 2px solid #DEB887;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            color: #8B4513;
+            display: none;
+        }
+
+        .explanation {
+            background: #E6F3FF;
+            border: 2px solid #87CEEB;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1rem;
+            color: #2C3E50;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .start-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .start-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .reset-button {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .reset-button:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+        }
+
+        .success-message {
+            background: #D4EDDA;
+            border: 2px solid #C3E6CB;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            color: #155724;
+            display: none;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes slideDown {
+            from { 
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .slide-down {
+            animation: slideDown 0.5s ease-out;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main class="container">
+   <h1 id="task-title">Object Permanence Task</h1>
+   <div class="instructions" id="instructions">
+    Watch carefully! A cat will appear, then be hidden by a box. Click on the box if you think the cat is still there!
+   </div>
+   <div class="task-area" id="task-area">
+    <div class="cat" id="cat">
+     🐱
+    </div>
+    <div class="box" id="box"></div>
+   </div><button class="start-button" id="start-button">Start Task</button>
+   <div class="prompt" id="prompt">
+    Did you not want to look for the cat? Or did you forget it existed?
+   </div>
+   <div class="success-message" id="success-message">
+    🎉 Excellent! You found the cat! You understand that objects continue to exist even when hidden.
+   </div>
+   <div class="explanation" id="explanation"><strong>About Object Permanence:</strong><br>
+     Children within the 0-2 year age group learn that objects still exist even when they cannot see them, but they don't inherently know this when they are born. This cognitive milestone, discovered by Jean Piaget, typically develops around 8-12 months of age. Before this, babies act as if hidden objects have ceased to exist entirely!
+   </div><button class="reset-button" id="reset-button">Try Again</button>
+  </main>
+  <script>
+        const defaultConfig = {
+            task_title: "Object Permanence Task",
+            cat_name: "Whiskers",
+            prompt_message: "Did you not want to look for the cat? Or did you forget it existed?",
+            explanation_text: "Children within the 0-2 year age group learn that objects still exist even when they cannot see them, but they don't inherently know this when they are born. This cognitive milestone, discovered by Jean Piaget, typically develops around 8-12 months of age. Before this, babies act as if hidden objects have ceased to exist entirely!"
+        };
+
+        let taskStarted = false;
+        let timeoutId = null;
+        let taskCompleted = false;
+
+        const elements = {
+            taskTitle: document.getElementById('task-title'),
+            instructions: document.getElementById('instructions'),
+            taskArea: document.getElementById('task-area'),
+            cat: document.getElementById('cat'),
+            box: document.getElementById('box'),
+            startButton: document.getElementById('start-button'),
+            prompt: document.getElementById('prompt'),
+            successMessage: document.getElementById('success-message'),
+            explanation: document.getElementById('explanation'),
+            resetButton: document.getElementById('reset-button')
+        };
+
+        function startTask() {
+            if (taskStarted) return;
+            
+            taskStarted = true;
+            elements.startButton.style.display = 'none';
+            elements.instructions.textContent = `Watch ${window.elementSdk?.config?.cat_name || defaultConfig.cat_name} the cat!`;
+            
+            // Show cat for 3 seconds
+            setTimeout(() => {
+                // Hide cat and show box
+                elements.cat.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    elements.cat.style.display = 'none';
+                    elements.box.style.display = 'block';
+                    elements.box.classList.add('slide-down');
+                    elements.instructions.textContent = 'Where did the cat go?';
+                    
+                    // Start 30-second timer
+                    timeoutId = setTimeout(showPrompt, 30000);
+                }, 500);
+            }, 3000);
+        }
+
+        function showPrompt() {
+            if (taskCompleted) return;
+            
+            const promptText = window.elementSdk?.config?.prompt_message || defaultConfig.prompt_message;
+            elements.prompt.textContent = promptText;
+            elements.prompt.style.display = 'block';
+            
+            // Show cat again after prompt
+            setTimeout(() => {
+                elements.cat.style.display = 'block';
+                elements.cat.style.opacity = '1';
+                elements.cat.classList.remove('fade-out');
+                elements.box.style.display = 'none';
+                
+                setTimeout(() => {
+                    showExplanation();
+                }, 2000);
+            }, 3000);
+        }
+
+        function showExplanation() {
+            const explanationText = window.elementSdk?.config?.explanation_text || defaultConfig.explanation_text;
+            elements.explanation.innerHTML = `<strong>About Object Permanence:</strong><br>${explanationText}`;
+            elements.explanation.style.display = 'block';
+            elements.resetButton.style.display = 'inline-block';
+        }
+
+        function handleBoxClick() {
+            if (taskCompleted) return;
+            
+            taskCompleted = true;
+            clearTimeout(timeoutId);
+            
+            // Show success
+            elements.box.style.display = 'none';
+            elements.cat.style.display = 'block';
+            elements.cat.style.opacity = '1';
+            elements.cat.classList.remove('fade-out');
+            elements.successMessage.style.display = 'block';
+            elements.instructions.textContent = `Great job! You found ${window.elementSdk?.config?.cat_name || defaultConfig.cat_name}!`;
+            
+            setTimeout(() => {
+                showExplanation();
+            }, 2000);
+        }
+
+        function resetTask() {
+            taskStarted = false;
+            taskCompleted = false;
+            clearTimeout(timeoutId);
+            
+            // Reset all elements
+            elements.cat.style.display = 'block';
+            elements.cat.style.opacity = '1';
+            elements.cat.classList.remove('fade-out');
+            elements.box.style.display = 'none';
+            elements.box.classList.remove('slide-down');
+            elements.startButton.style.display = 'inline-block';
+            elements.prompt.style.display = 'none';
+            elements.successMessage.style.display = 'none';
+            elements.explanation.style.display = 'none';
+            elements.resetButton.style.display = 'none';
+            elements.instructions.textContent = 'Watch carefully! A cat will appear, then be hidden by a box. Click on the box if you think the cat is still there!';
+        }
+
+        // Event listeners
+        elements.startButton.addEventListener('click', startTask);
+        elements.box.addEventListener('click', handleBoxClick);
+        elements.resetButton.addEventListener('click', resetTask);
+
+        // Element SDK implementation
+        async function onConfigChange(config) {
+            const title = config.task_title || defaultConfig.task_title;
+            elements.taskTitle.textContent = title;
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [
+                    {
+                        get: () => config.background_color || "#87CEEB",
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.container_color || "#FFFFFF",
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ container_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.text_color || "#2C3E50",
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.button_color || "#4CAF50",
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ button_color: value });
+                            }
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: {
+                    get: () => config.font_family || "Comic Sans MS",
+                    set: (value) => {
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_family: value });
+                        }
+                    }
+                },
+                fontSizeable: {
+                    get: () => config.font_size || 16,
+                    set: (value) => {
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_size: value });
+                        }
+                    }
+                }
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["task_title", config.task_title || defaultConfig.task_title],
+                ["cat_name", config.cat_name || defaultConfig.cat_name],
+                ["prompt_message", config.prompt_message || defaultConfig.prompt_message],
+                ["explanation_text", config.explanation_text || defaultConfig.explanation_text]
+            ]);
+        }
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9966adc240a6605e',t:'MTc2MTc4MjkxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
