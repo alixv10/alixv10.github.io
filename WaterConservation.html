@@ -7,8 +7,9 @@
   <script src="/_sdk/element_sdk.js"></script>
   <style>
         body {
+			max-width: 768px;
             box-sizing: border-box;
-            margin: 0;
+            margin: auto;
             padding: 20px;
             font-family: 'Comic Sans MS', cursive, sans-serif;
             background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
@@ -92,10 +93,12 @@
 
         .water-wide {
             height: 60px;
+			width: 74px;
         }
 
         .water-tall {
             height: 120px;
+			width: 44px;
         }
 
         .instructions {
@@ -216,23 +219,47 @@
             display: none;
         }
 
-        .pouring-animation {
-            position: absolute;
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 100px;
-            background: linear-gradient(to bottom, transparent 0%, #87CEEB 20%, #4682B4 100%);
-            border-radius: 10px;
-            opacity: 0;
-            animation: pour 2s ease-in-out;
+        .glass-tilting {
+            transform-origin: bottom center;
+            animation: liftTiltPour 4s ease-in-out;
         }
 
-        @keyframes pour {
+        .pouring-stream {
+            position: absolute;
+            width: 8px;
+            height: 0;
+            background: linear-gradient(to bottom, #87CEEB, #4682B4);
+            border-radius: 4px;
+            opacity: 0;
+            transform-origin: top center;
+            animation: streamPour 2s ease-in-out 1.5s;
+        }
+
+        @keyframes liftTiltPour {
+            0% { 
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            25% { 
+                transform: translateY(-120px) translateX(90px) rotate(0deg);
+            }
+            35% { 
+                transform: translateY(-120px) translateX(90px) rotate(45deg);
+            }
+            75% { 
+                transform: translateY(-120px) translateX(90px) rotate(45deg);
+            }
+            85% { 
+                transform: translateY(-120px) translateX(90px) rotate(0deg);
+            }
+            100% { 
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+        }
+
+        @keyframes streamPour {
             0% { opacity: 0; height: 0; }
-            20% { opacity: 1; height: 100px; }
-            80% { opacity: 1; height: 100px; }
+            10% { opacity: 1; height: 100px; }
+            90% { opacity: 1; height: 100px; }
             100% { opacity: 0; height: 0; }
         }
 
@@ -279,7 +306,7 @@
       <div class="water" id="water3" style="height: 0;"></div>
      </div>
     </div>
-    <div class="pouring-animation" id="pouring" style="display: none;"></div>
+    <div class="pouring-stream" id="pouring-stream" style="display: none;"></div>
    </div><button class="start-button" id="start-button">Start Demonstration</button>
    <div class="question-section" id="question-section">
     <div class="question-text" id="question-text">
@@ -320,7 +347,7 @@
             water1: document.getElementById('water1'),
             water2: document.getElementById('water2'),
             water3: document.getElementById('water3'),
-            pouring: document.getElementById('pouring'),
+            pouringStream: document.getElementById('pouring-stream'),
             startButton: document.getElementById('start-button'),
             questionSection: document.getElementById('question-section'),
             questionText: document.getElementById('question-text'),
@@ -341,29 +368,47 @@
             
             // Wait 2 seconds, then start pouring animation
             setTimeout(() => {
-                // Show pouring animation
-                elements.pouring.style.display = 'block';
+                // Show tall glass first
+                elements.glass3.classList.add('show', 'slide-in');
                 
-                // Start water transformation
                 setTimeout(() => {
-                    // Remove water from glass 2
-                    elements.water2.style.height = '0px';
+                    // Start tilting glass 2 and show pouring stream
+                    elements.glass2.classList.add('glass-tilting');
+                    elements.pouringStream.style.display = 'block';
                     
-                    // Show tall glass and fill it
-                    elements.glass3.classList.add('show', 'slide-in');
+                    // Position pouring stream above the tall glass
+                    const glass3Rect = elements.glass3.getBoundingClientRect();
+                    const containerRect = elements.taskArea.getBoundingClientRect();
                     
+                    const streamLeft = glass3Rect.left - containerRect.left - 20;
+                    const streamTop = glass3Rect.top - containerRect.top - 20;
+                    
+                    elements.pouringStream.style.left = streamLeft + 'px';
+                    elements.pouringStream.style.top = streamTop + 'px';
+                    
+                    // Start water transformation after slight delay
                     setTimeout(() => {
-                        elements.water3.style.height = '120px';
-                        elements.water3.classList.add('water-tall');
-                    }, 500);
+                        // Gradually remove water from glass 2
+                        elements.water2.style.transition = 'height 1.8s ease-out';
+                        elements.water2.style.height = '0px';
+                        
+                        // Gradually fill glass 3
+                        setTimeout(() => {
+                            elements.water3.style.transition = 'height 1.8s ease-out';
+                            elements.water3.style.height = '120px';
+                            elements.water3.classList.add('water-tall');
+                        }, 200);
+                        
+                    }, 1400);
                     
                 }, 500);
                 
-                // Hide pouring animation and show question
+                // Clean up animations and show question
                 setTimeout(() => {
-                    elements.pouring.style.display = 'none';
+                    elements.glass2.classList.remove('glass-tilting');
+                    elements.pouringStream.style.display = 'none';
                     showQuestion();
-                }, 2500);
+                }, 5000);
                 
             }, 2000);
         }
@@ -425,13 +470,16 @@
             elements.resultMessage.style.display = 'none';
             elements.explanation.style.display = 'none';
             elements.resetButton.style.display = 'none';
-            elements.pouring.style.display = 'none';
+            elements.pouringStream.style.display = 'none';
             
             // Reset glasses and water
+            elements.glass2.classList.remove('glass-tilting');
             elements.glass3.classList.remove('show', 'slide-in');
             elements.water1.style.height = '60px';
             elements.water2.style.height = '60px';
+            elements.water2.style.transition = 'all 1.5s ease';
             elements.water3.style.height = '0px';
+            elements.water3.style.transition = 'all 1.5s ease';
             elements.water3.classList.remove('water-tall');
             
             // Reset buttons
@@ -567,5 +615,5 @@
             });
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'997e32ce510b605e',t:'MTc2MjAyOTUzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'997f55a8b71a605e',t:'MTc2MjA0MTQ0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
