@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classification Sorting Task</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #FFB6C1 0%, #DDA0DD 100%);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2C3E50;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            font-size: 1.2rem;
+            color: #34495E;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .shapes-area {
+            background: #F0F8FF;
+            border: 3px dashed #9370DB;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            min-height: 200px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .shape {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            cursor: move;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            user-select: none;
+        }
+
+        .shape:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .shape.dragging {
+            opacity: 0.5;
+            transform: rotate(10deg);
+        }
+
+        .shape.small {
+            width: 60px;
+            height: 60px;
+        }
+
+        .shape.large {
+            width: 100px;
+            height: 100px;
+        }
+
+        .sorting-grid {
+            display: grid;
+            grid-template-columns: auto repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .grid-header {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #2C3E50;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row-label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2C3E50;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-zone {
+            background: #FFF8DC;
+            border: 3px dashed #DAA520;
+            border-radius: 15px;
+            min-height: 120px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            background: #FFFACD;
+            border-color: #FFD700;
+            transform: scale(1.05);
+        }
+
+        .drop-zone.correct {
+            background: #90EE90;
+            border-color: #32CD32;
+        }
+
+        .drop-zone.incorrect {
+            background: #FFB6C1;
+            border-color: #FF6B6B;
+        }
+
+        .check-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 20px;
+        }
+
+        .check-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .check-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-button {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-left: 15px;
+        }
+
+        .reset-button:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+        }
+
+        .result-message {
+            background: #E6F3FF;
+            border: 2px solid #87CEEB;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            color: #2C3E50;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .result-message.success {
+            background: #90EE90;
+            border-color: #32CD32;
+        }
+
+        .result-message.error {
+            background: #FFB6C1;
+            border-color: #FF6B6B;
+        }
+
+        .explanation {
+            background: #E6F3FF;
+            border: 2px solid #87CEEB;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1rem;
+            color: #2C3E50;
+            line-height: 1.6;
+            display: none;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main class="container">
+   <h1 id="task-title">Classification Sorting Task</h1>
+   <div class="instructions" id="instructions">
+    Sort these shapes by <strong>BOTH size AND color</strong>. Drag each shape to the correct box in the grid below.
+   </div>
+   <div class="shapes-area" id="shapes-area"></div>
+   <div class="sorting-grid">
+    <div class="grid-header"></div>
+    <div class="grid-header">
+     🔴 Red
+    </div>
+    <div class="grid-header">
+     🔵 Blue
+    </div>
+    <div class="row-label">
+     Small
+    </div>
+    <div class="drop-zone" data-size="small" data-color="red"></div>
+    <div class="drop-zone" data-size="small" data-color="blue"></div>
+    <div class="row-label">
+     Large
+    </div>
+    <div class="drop-zone" data-size="large" data-color="red"></div>
+    <div class="drop-zone" data-size="large" data-color="blue"></div>
+   </div>
+   <div class="button-container"><button class="check-button" id="check-button">Check My Sorting</button> <button class="reset-button" id="reset-button">Reset</button>
+   </div>
+   <div class="result-message" id="result-message"></div>
+   <div class="explanation" id="explanation"><strong>About Classification in Concrete Operational Stage:</strong><br>
+     Children in the concrete operational stage (ages 7-11) develop the ability to classify objects using multiple criteria simultaneously. They can understand that objects can belong to more than one category at the same time (e.g., "small AND red"). This represents a significant cognitive advancement from the preoperational stage, where children typically focus on only one characteristic at a time.
+   </div>
+  </main>
+  <script>
+        const defaultConfig = {
+            task_title: "Classification Sorting Task",
+            initial_instruction: "Sort these shapes by BOTH size AND color. Drag each shape to the correct box in the grid below.",
+            success_message: "🎉 Excellent work! You correctly sorted all the shapes by both size and color. This shows you can classify objects using multiple criteria at once!",
+            explanation_text: "Children in the concrete operational stage (ages 7-11) develop the ability to classify objects using multiple criteria simultaneously. They can understand that objects can belong to more than one category at the same time (e.g., \"small AND red\"). This represents a significant cognitive advancement from the preoperational stage, where children typically focus on only one characteristic at a time.",
+            background_color: "#FFB6C1",
+            container_color: "#FFFFFF",
+            text_color: "#2C3E50",
+            button_color: "#4CAF50",
+            font_family: "Comic Sans MS",
+            font_size: 16
+        };
+
+        const shapes = [
+            { id: 1, size: 'small', color: 'red', bgColor: '#FF6B6B' },
+            { id: 2, size: 'small', color: 'red', bgColor: '#FF6B6B' },
+            { id: 3, size: 'small', color: 'blue', bgColor: '#4169E1' },
+            { id: 4, size: 'small', color: 'blue', bgColor: '#4169E1' },
+            { id: 5, size: 'large', color: 'red', bgColor: '#FF6B6B' },
+            { id: 6, size: 'large', color: 'red', bgColor: '#FF6B6B' },
+            { id: 7, size: 'large', color: 'blue', bgColor: '#4169E1' },
+            { id: 8, size: 'large', color: 'blue', bgColor: '#4169E1' }
+        ];
+
+        let draggedElement = null;
+        let hasChecked = false;
+
+        const elements = {
+            taskTitle: document.getElementById('task-title'),
+            instructions: document.getElementById('instructions'),
+            shapesArea: document.getElementById('shapes-area'),
+            checkButton: document.getElementById('check-button'),
+            resetButton: document.getElementById('reset-button'),
+            resultMessage: document.getElementById('result-message'),
+            explanation: document.getElementById('explanation')
+        };
+
+        function initializeShapes() {
+            elements.shapesArea.innerHTML = '';
+            
+            // Shuffle shapes for randomness
+            const shuffled = [...shapes].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(shape => {
+                const shapeDiv = document.createElement('div');
+                shapeDiv.className = `shape ${shape.size}`;
+                shapeDiv.style.backgroundColor = shape.bgColor;
+                shapeDiv.draggable = true;
+                shapeDiv.dataset.id = shape.id;
+                shapeDiv.dataset.size = shape.size;
+                shapeDiv.dataset.color = shape.color;
+                
+                shapeDiv.addEventListener('dragstart', handleDragStart);
+                shapeDiv.addEventListener('dragend', handleDragEnd);
+                
+                elements.shapesArea.appendChild(shapeDiv);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            if (e.target.classList.contains('drop-zone')) {
+                e.target.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (e.target.classList.contains('drop-zone')) {
+                e.target.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            e.target.classList.remove('drag-over');
+            
+            if (e.target.classList.contains('drop-zone') && draggedElement) {
+                e.target.appendChild(draggedElement);
+                draggedElement = null;
+                
+                // Reset any previous feedback
+                if (hasChecked) {
+                    resetFeedback();
+                    hasChecked = false;
+                }
+            }
+            
+            return false;
+        }
+
+        function setupDropZones() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+            
+            // Also make shapes area droppable for reset
+            elements.shapesArea.addEventListener('dragover', handleDragOver);
+            elements.shapesArea.addEventListener('drop', handleDrop);
+        }
+
+        function checkSorting() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let allCorrect = true;
+            let allSorted = true;
+            
+            dropZones.forEach(zone => {
+                const expectedSize = zone.dataset.size;
+                const expectedColor = zone.dataset.color;
+                const shapesInZone = zone.querySelectorAll('.shape');
+                
+                if (shapesInZone.length === 0) {
+                    allSorted = false;
+                }
+                
+                shapesInZone.forEach(shape => {
+                    const shapeSize = shape.dataset.size;
+                    const shapeColor = shape.dataset.color;
+                    
+                    if (shapeSize === expectedSize && shapeColor === expectedColor) {
+                        zone.classList.add('correct');
+                        zone.classList.remove('incorrect');
+                    } else {
+                        zone.classList.add('incorrect');
+                        zone.classList.remove('correct');
+                        allCorrect = false;
+                    }
+                });
+            });
+            
+            // Check if all shapes are sorted
+            const shapesInArea = elements.shapesArea.querySelectorAll('.shape');
+            if (shapesInArea.length > 0) {
+                allSorted = false;
+            }
+            
+            hasChecked = true;
+            
+            if (!allSorted) {
+                const successMessage = window.elementSdk?.config?.success_message || defaultConfig.success_message;
+                elements.resultMessage.textContent = 'Please sort all shapes into the grid before checking!';
+                elements.resultMessage.className = 'result-message error';
+                elements.resultMessage.style.display = 'block';
+            } else if (allCorrect) {
+                const successMessage = window.elementSdk?.config?.success_message || defaultConfig.success_message;
+                elements.resultMessage.textContent = successMessage;
+                elements.resultMessage.className = 'result-message success';
+                elements.resultMessage.style.display = 'block';
+                
+                setTimeout(() => {
+                    showExplanation();
+                }, 2000);
+            } else {
+                elements.resultMessage.textContent = 'Not quite right. Look at the shapes in the red boxes - they need to match BOTH the size label on the left AND the color label at the top. Try again!';
+                elements.resultMessage.className = 'result-message error';
+                elements.resultMessage.style.display = 'block';
+            }
+        }
+
+        function showExplanation() {
+            const explanationText = window.elementSdk?.config?.explanation_text || defaultConfig.explanation_text;
+            elements.explanation.innerHTML = `<strong>About Classification in Concrete Operational Stage:</strong><br>${explanationText}`;
+            elements.explanation.style.display = 'block';
+        }
+
+        function resetFeedback() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.classList.remove('correct', 'incorrect');
+            });
+            elements.resultMessage.style.display = 'none';
+            elements.explanation.style.display = 'none';
+        }
+
+        function resetTask() {
+            resetFeedback();
+            hasChecked = false;
+            initializeShapes();
+        }
+
+        // Event listeners
+        elements.checkButton.addEventListener('click', checkSorting);
+        elements.resetButton.addEventListener('click', resetTask);
+
+        // Initialize
+        initializeShapes();
+        setupDropZones();
+
+        // Element SDK implementation
+        async function onConfigChange(config) {
+            const title = config.task_title || defaultConfig.task_title;
+            const initialInstruction = config.initial_instruction || defaultConfig.initial_instruction;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const backgroundColor = config.background_color || defaultConfig.background_color;
+            const containerColor = config.container_color || defaultConfig.container_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            const buttonColor = config.button_color || defaultConfig.button_color;
+            
+            elements.taskTitle.textContent = title;
+            elements.instructions.innerHTML = initialInstruction;
+            
+            // Apply font
+            const baseFontStack = 'cursive, sans-serif';
+            document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            // Apply font sizes
+            elements.taskTitle.style.fontSize = `${baseSize * 2.5}px`;
+            elements.instructions.style.fontSize = `${baseSize * 1.2}px`;
+            
+            const gridHeaders = document.querySelectorAll('.grid-header, .row-label');
+            gridHeaders.forEach(header => {
+                header.style.fontSize = `${baseSize * 1.1}px`;
+            });
+            
+            // Apply colors
+            document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, #DDA0DD 100%)`;
+            document.querySelector('.container').style.backgroundColor = containerColor;
+            elements.taskTitle.style.color = textColor;
+            elements.instructions.style.color = textColor;
+            elements.checkButton.style.backgroundColor = buttonColor;
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [
+                    {
+                        get: () => config.background_color || defaultConfig.background_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.container_color || defaultConfig.container_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ container_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.text_color || defaultConfig.text_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.button_color || defaultConfig.button_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ button_color: value });
+                            }
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: {
+                    get: () => config.font_family || defaultConfig.font_family,
+                    set: (value) => {
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_family: value });
+                        }
+                    }
+                },
+                fontSizeable: {
+                    get: () => config.font_size || defaultConfig.font_size,
+                    set: (value) => {
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_size: value });
+                        }
+                    }
+                }
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["task_title", config.task_title || defaultConfig.task_title],
+                ["initial_instruction", config.initial_instruction || defaultConfig.initial_instruction],
+                ["success_message", config.success_message || defaultConfig.success_message],
+                ["explanation_text", config.explanation_text || defaultConfig.explanation_text]
+            ]);
+        }
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99d0d7a8f5ba9a4c',t:'MTc2Mjg5NjExOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
