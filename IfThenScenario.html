@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logical Reasoning Task</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #B19CD9 0%, #ADD8E6 100%);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2C3E50;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            font-size: 1.2rem;
+            color: #34495E;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .scenario-box {
+            background: linear-gradient(135deg, #E6E6FA 0%, #F0E68C 100%);
+            border: 3px solid #9370DB;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .premise {
+            font-size: 1.4rem;
+            color: #2C3E50;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            border-left: 5px solid #9370DB;
+        }
+
+        .fact {
+            font-size: 1.3rem;
+            color: #2C3E50;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            border-left: 5px solid #DAA520;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            color: #8B008B;
+            font-weight: bold;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .options-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .option-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: bold;
+            min-width: 140px;
+        }
+
+        .option-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .option-button.selected {
+            background: #2196F3;
+            transform: scale(1.1);
+        }
+
+        .option-button.correct {
+            background: #28a745;
+            animation: pulse 0.5s ease;
+        }
+
+        .option-button.incorrect {
+            background: #dc3545;
+            animation: shake 0.5s ease;
+        }
+
+        .option-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .submit-button {
+            background: #FF8C00;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 20px;
+        }
+
+        .submit-button:hover {
+            background: #FF7F00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .submit-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-button {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .reset-button:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+        }
+
+        .result-message {
+            background: #E6F3FF;
+            border: 2px solid #87CEEB;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            color: #2C3E50;
+            line-height: 1.8;
+            display: none;
+            text-align: left;
+        }
+
+        .result-message.success {
+            background: #D4EDDA;
+            border-color: #28a745;
+        }
+
+        .result-message.error {
+            background: #F8D7DA;
+            border-color: #dc3545;
+        }
+
+        .explanation {
+            background: #E6F3FF;
+            border: 2px solid #87CEEB;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            font-size: 1rem;
+            color: #2C3E50;
+            line-height: 1.8;
+            display: none;
+            text-align: left;
+        }
+
+        .logic-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main class="container">
+   <div class="logic-icon">
+    🤔
+   </div>
+   <h1 id="task-title">Logical Reasoning Task</h1>
+   <div class="instructions" id="instructions">
+    Read the logical statement carefully and think about what you can conclude. Then choose your answer.
+   </div>
+   <div class="scenario-box">
+    <div class="premise" id="premise"><strong>Rule:</strong> If there is a fork, then there is a knife.
+    </div>
+    <div class="fact" id="fact"><strong>Observation:</strong> There is no fork.
+    </div>
+    <div class="question" id="question">
+     ❓ Is there a knife?
+    </div>
+   </div>
+   <div class="options-container"><button class="option-button" id="option-yes" data-answer="yes">Yes</button> <button class="option-button" id="option-no" data-answer="no">No</button> <button class="option-button" id="option-maybe" data-answer="maybe">Maybe</button>
+   </div><button class="submit-button" id="submit-button" disabled>Submit Answer</button>
+   <div class="result-message" id="result-message"></div>
+   <div class="explanation" id="explanation"><strong>About Formal Operational Thinking:</strong><br>
+     Children in the formal operational stage (ages 11+) develop the ability to think abstractly and reason about hypothetical situations. They can understand logical implications and recognize that "if A then B" does NOT mean "if not A then not B." This task tests the ability to reason through conditional logic without being misled by the inverse fallacy. The correct answer is "Maybe" - the rule only tells us what happens when there IS a fork, not what happens when there isn't one.
+   </div><button class="reset-button" id="reset-button">Try Another Problem</button>
+  </main>
+  <script>
+        const defaultConfig = {
+            task_title: "Logical Reasoning Task",
+            initial_instruction: "Read the logical statement carefully and think about what you can conclude. Then choose your answer.",
+            scenario_premise: "If there is a fork, then there is a knife.",
+            scenario_fact: "There is no fork.",
+            scenario_question: "Is there a knife?",
+            explanation_text: "Children in the formal operational stage (ages 11+) develop the ability to think abstractly and reason about hypothetical situations. They can understand logical implications and recognize that \"if A then B\" does NOT mean \"if not A then not B.\" This task tests the ability to reason through conditional logic without being misled by the inverse fallacy. The correct answer is \"Maybe\" - the rule only tells us what happens when there IS a fork, not what happens when there isn't one.",
+            background_color: "#B19CD9",
+            container_color: "#FFFFFF",
+            text_color: "#2C3E50",
+            button_color: "#4CAF50",
+            font_family: "Comic Sans MS",
+            font_size: 16
+        };
+
+        let selectedAnswer = null;
+        let hasSubmitted = false;
+
+        const elements = {
+            taskTitle: document.getElementById('task-title'),
+            instructions: document.getElementById('instructions'),
+            premise: document.getElementById('premise'),
+            fact: document.getElementById('fact'),
+            question: document.getElementById('question'),
+            optionYes: document.getElementById('option-yes'),
+            optionNo: document.getElementById('option-no'),
+            optionMaybe: document.getElementById('option-maybe'),
+            submitButton: document.getElementById('submit-button'),
+            resetButton: document.getElementById('reset-button'),
+            resultMessage: document.getElementById('result-message'),
+            explanation: document.getElementById('explanation')
+        };
+
+        function selectOption(answer) {
+            if (hasSubmitted) return;
+            
+            selectedAnswer = answer;
+            
+            // Update button states
+            [elements.optionYes, elements.optionNo, elements.optionMaybe].forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            const selectedButton = document.querySelector(`[data-answer="${answer}"]`);
+            selectedButton.classList.add('selected');
+            
+            elements.submitButton.disabled = false;
+        }
+
+        function submitAnswer() {
+            if (!selectedAnswer || hasSubmitted) return;
+            
+            hasSubmitted = true;
+            
+            // Disable all buttons
+            [elements.optionYes, elements.optionNo, elements.optionMaybe].forEach(btn => {
+                btn.disabled = true;
+            });
+            elements.submitButton.disabled = true;
+            
+            // The correct answer is "maybe" because the conditional only works one way
+            const correctAnswer = 'maybe';
+            const selectedButton = document.querySelector(`[data-answer="${selectedAnswer}"]`);
+            const correctButton = document.querySelector(`[data-answer="${correctAnswer}"]`);
+            
+            if (selectedAnswer === correctAnswer) {
+                selectedButton.classList.add('correct');
+                elements.resultMessage.innerHTML = `
+                    <strong>✅ Excellent logical thinking!</strong><br><br>
+                    You're absolutely right - the answer is <strong>Maybe</strong>.<br><br>
+                    The rule states: "If there is a fork, then there is a knife." This means that whenever we see a fork, we can be certain there's a knife.<br><br>
+                    However, when there is <strong>no fork</strong>, the rule tells us nothing about whether a knife exists or not. There could be a knife by itself, or there might be no knife at all. We simply don't know!<br><br>
+                    This is a common logical fallacy called "denying the antecedent" - assuming that "if A then B" means "if not A then not B," which is incorrect.
+                `;
+                elements.resultMessage.className = 'result-message success';
+            } else {
+                selectedButton.classList.add('incorrect');
+                correctButton.classList.add('correct');
+                
+                let specificFeedback = '';
+                if (selectedAnswer === 'yes') {
+                    specificFeedback = 'The rule doesn\'t guarantee a knife exists when there\'s no fork - it only tells us what happens when there IS a fork.';
+                } else if (selectedAnswer === 'no') {
+                    specificFeedback = 'We can\'t conclude there\'s no knife - the rule doesn\'t tell us what happens when there\'s no fork. A knife could still exist on its own!';
+                }
+                
+                elements.resultMessage.innerHTML = `
+                    <strong>🤔 Not quite!</strong><br><br>
+                    ${specificFeedback}<br><br>
+                    The correct answer is <strong>Maybe</strong>. Here's why:<br><br>
+                    The rule "If there is a fork, then there is a knife" only works in one direction. It tells us that a fork guarantees a knife, but it doesn't tell us anything about what happens when there's no fork.<br><br>
+                    When there's no fork, a knife might still exist by itself, or there might be no knife. We simply cannot determine this from the given information.
+                `;
+                elements.resultMessage.className = 'result-message error';
+            }
+            
+            elements.resultMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                showExplanation();
+            }, 2000);
+        }
+
+        function showExplanation() {
+            const explanationText = window.elementSdk?.config?.explanation_text || defaultConfig.explanation_text;
+            elements.explanation.innerHTML = `<strong>About Formal Operational Thinking:</strong><br>${explanationText}`;
+            elements.explanation.style.display = 'block';
+            elements.resetButton.style.display = 'inline-block';
+        }
+
+        function resetTask() {
+            hasSubmitted = false;
+            selectedAnswer = null;
+            
+            // Reset button states
+            [elements.optionYes, elements.optionNo, elements.optionMaybe].forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'incorrect');
+                btn.disabled = false;
+            });
+            
+            elements.submitButton.disabled = true;
+            elements.resultMessage.style.display = 'none';
+            elements.explanation.style.display = 'none';
+            elements.resetButton.style.display = 'none';
+        }
+
+        // Event listeners
+        elements.optionYes.addEventListener('click', () => selectOption('yes'));
+        elements.optionNo.addEventListener('click', () => selectOption('no'));
+        elements.optionMaybe.addEventListener('click', () => selectOption('maybe'));
+        elements.submitButton.addEventListener('click', submitAnswer);
+        elements.resetButton.addEventListener('click', resetTask);
+
+        // Element SDK implementation
+        async function onConfigChange(config) {
+            const title = config.task_title || defaultConfig.task_title;
+            const initialInstruction = config.initial_instruction || defaultConfig.initial_instruction;
+            const premise = config.scenario_premise || defaultConfig.scenario_premise;
+            const fact = config.scenario_fact || defaultConfig.scenario_fact;
+            const question = config.scenario_question || defaultConfig.scenario_question;
+            const customFont = config.font_family || defaultConfig.font_family;
+            const baseSize = config.font_size || defaultConfig.font_size;
+            const backgroundColor = config.background_color || defaultConfig.background_color;
+            const containerColor = config.container_color || defaultConfig.container_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            const buttonColor = config.button_color || defaultConfig.button_color;
+            
+            elements.taskTitle.textContent = title;
+            elements.instructions.textContent = initialInstruction;
+            elements.premise.innerHTML = `<strong>Rule:</strong> ${premise}`;
+            elements.fact.innerHTML = `<strong>Observation:</strong> ${fact}`;
+            elements.question.innerHTML = `❓ ${question}`;
+            
+            // Apply font
+            const baseFontStack = 'cursive, sans-serif';
+            document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+            
+            // Apply font sizes
+            elements.taskTitle.style.fontSize = `${baseSize * 2.5}px`;
+            elements.instructions.style.fontSize = `${baseSize * 1.2}px`;
+            elements.premise.style.fontSize = `${baseSize * 1.4}px`;
+            elements.fact.style.fontSize = `${baseSize * 1.3}px`;
+            elements.question.style.fontSize = `${baseSize * 1.5}px`;
+            
+            const optionButtons = document.querySelectorAll('.option-button');
+            optionButtons.forEach(btn => {
+                btn.style.fontSize = `${baseSize * 1.3}px`;
+            });
+            
+            // Apply colors
+            document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, #ADD8E6 100%)`;
+            document.querySelector('.container').style.backgroundColor = containerColor;
+            elements.taskTitle.style.color = textColor;
+            elements.instructions.style.color = textColor;
+            
+            // Apply button color to unselected buttons
+            optionButtons.forEach(btn => {
+                if (!btn.classList.contains('correct') && !btn.classList.contains('incorrect') && !btn.classList.contains('selected')) {
+                    btn.style.backgroundColor = buttonColor;
+                }
+            });
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [
+                    {
+                        get: () => config.background_color || defaultConfig.background_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ background_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.container_color || defaultConfig.container_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ container_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.text_color || defaultConfig.text_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ text_color: value });
+                            }
+                        }
+                    },
+                    {
+                        get: () => config.button_color || defaultConfig.button_color,
+                        set: (value) => {
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ button_color: value });
+                            }
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: {
+                    get: () => config.font_family || defaultConfig.font_family,
+                    set: (value) => {
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_family: value });
+                        }
+                    }
+                },
+                fontSizeable: {
+                    get: () => config.font_size || defaultConfig.font_size,
+                    set: (value) => {
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_size: value });
+                        }
+                    }
+                }
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["task_title", config.task_title || defaultConfig.task_title],
+                ["initial_instruction", config.initial_instruction || defaultConfig.initial_instruction],
+                ["scenario_premise", config.scenario_premise || defaultConfig.scenario_premise],
+                ["scenario_fact", config.scenario_fact || defaultConfig.scenario_fact],
+                ["scenario_question", config.scenario_question || defaultConfig.scenario_question],
+                ["explanation_text", config.explanation_text || defaultConfig.explanation_text]
+            ]);
+        }
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99d112b135e29a4c',t:'MTc2Mjg5ODUzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
