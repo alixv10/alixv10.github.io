@@ -34,12 +34,15 @@
     }
 
     .draggable {
+        display: inline-block;      /* prevents full-width stretching */
+        width: 180px;               /* set consistent size */
         padding: 10px;
         margin: 8px;
         background-color: #4CAF50;
         color: white;
         border-radius: 5px;
         cursor: grab;
+        text-align: center;
     }
 
     .dragging {
@@ -48,6 +51,9 @@
 
     #items {
         margin-top: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 </style>
 </head>
