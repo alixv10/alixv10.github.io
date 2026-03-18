@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Create a Python Variable</title>
+<title>Build a Python Variable</title>
 
 <style>
 body {
@@ -69,7 +69,7 @@ button:hover {
 
 <body>
 
-<h2>Build a Python Variable</h2>
+<h2>Create a Python Variable</h2>
 <p>Drag the pieces into the correct order</p>
 
 <!-- Draggable pieces -->
@@ -129,6 +129,7 @@ function checkAnswer() {
 
         if (value === correctOrder[position]) {
             item.style.backgroundColor = "#4CAF50"; // correct
+			launchConfetti();
         } else {
             item.style.backgroundColor = "#FFD54F"; // incorrect
         }
@@ -148,6 +149,15 @@ function resetActivity() {
     });
 }
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+</script>
 </body>
 </html>
