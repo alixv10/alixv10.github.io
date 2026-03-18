@@ -119,6 +119,7 @@ dropzones.forEach(zone => {
 const correctOrder = ["x", "=", "5"];
 
 function checkAnswer() {
+	let allCorrect = true;
     dropzones.forEach(zone => {
         const item = zone.children[0];
 
@@ -129,11 +130,15 @@ function checkAnswer() {
 
         if (value === correctOrder[position]) {
             item.style.backgroundColor = "#4CAF50"; // correct
-			launchConfetti();
         } else {
             item.style.backgroundColor = "#FFD54F"; // incorrect
+			allCorrect = false;
         }
     });
+	
+	if (allCorrect) {
+		launchConfetti();
+	}
 }
 
 function resetActivity() {
