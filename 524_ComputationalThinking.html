@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Drag and Drop Sorting</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    h2 {
+        margin-top: 20px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 30px;
+    }
+
+    .dropzone {
+        width: 22%;
+        min-height: 200px;
+        border: 2px dashed #999;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .dropzone h3 {
+        margin-top: 0;
+    }
+
+    .draggable {
+        padding: 10px;
+        margin: 8px;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        cursor: grab;
+    }
+
+    .dragging {
+        opacity: 0.5;
+    }
+
+    #items {
+        margin-top: 30px;
+    }
+</style>
+</head>
+
+<body>
+
+<h2>Sort the Ideas into the Correct Category</h2>
+
+<div id="items">
+    <div class="draggable" draggable="true">Break problem into steps</div>
+    <div class="draggable" draggable="true">Ignore unnecessary details</div>
+    <div class="draggable" draggable="true">Look for repeated patterns</div>
+    <div class="draggable" draggable="true">Write step-by-step instructions</div>
+    <div class="draggable" draggable="true">Group similar items</div>
+    <div class="draggable" draggable="true">Focus on key information</div>
+    <div class="draggable" draggable="true">Identify similarities</div>
+    <div class="draggable" draggable="true">Create a clear process</div>
+</div>
+
+<div class="container">
+    <div class="dropzone"><h3>Decomposition</h3></div>
+    <div class="dropzone"><h3>Abstraction</h3></div>
+    <div class="dropzone"><h3>Pattern Recognition</h3></div>
+    <div class="dropzone"><h3>Algorithmic Thinking</h3></div>
+</div>
+
+<script>
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+
+    draggables.forEach(item => {
+        item.addEventListener('dragstart', () => {
+            item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
+        });
+    });
+
+    dropzones.forEach(zone => {
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            const dragging = document.querySelector('.dragging');
+            zone.appendChild(dragging);
+        });
+    });
+</script>
+
+</body>
+</html>
