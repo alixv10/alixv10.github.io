@@ -13,6 +13,10 @@
     h2 {
         margin-top: 20px;
     }
+	h4 {
+		font-size: 0.9em;
+		font-weight: normal;
+	}
 
     .container {
 		display: grid;
@@ -88,25 +92,27 @@
 <h2>Sort the Ideas into the Correct Category</h2>
 
 <div id="items">
-    <div class="draggable" draggable="true" data-answer="decomposition">Know the current time</div>
-    <div class="draggable" draggable="true" data-answer="decomposition">Know when the appointment is</div>
     <div class="draggable" draggable="true" data-answer="pattern">Joe often forgets to check the time</div>
-    <div class="draggable" draggable="true" data-answer="pattern">Joe is late to many appointments</div>
-    <div class="draggable" draggable="true" data-answer="abstraction">Joe needs a reminder at the right time</div>
-    <div class="draggable" draggable="true" data-answer="abstraction">Focus on alerting Joe, not just showing time</div>
     <div class="draggable" draggable="true" data-answer="algorithm">Set an alarm time</div>
+    <div class="draggable" draggable="true" data-answer="decomposition">Know the current time</div>
+    <div class="draggable" draggable="true" data-answer="abstraction">Focus on alerting Joe, not just showing time</div>
+    <div class="draggable" draggable="true" data-answer="abstraction">Joe needs a reminder at the right time</div>
+    <div class="draggable" draggable="true" data-answer="decomposition">Know when the appointment is</div>
     <div class="draggable" draggable="true" data-answer="algorithm">If the times match, play a sound</div>
+    <div class="draggable" draggable="true" data-answer="pattern">Joe is late to many appointments</div>
 </div>
 
 <div class="container">
-    <div class="dropzone" data-category="decomposition"><h3>Decomposition</h3></div>
-    <div class="dropzone" data-category="abstraction"><h3>Abstraction</h3></div>
-    <div class="dropzone" data-category="pattern"><h3>Pattern Recognition</h3></div>
-    <div class="dropzone" data-category="algorithm"><h3>Algorithmic Thinking</h3></div>
+    <div class="dropzone" data-category="decomposition"><h3>Decomposition</h3><h4>Break the problem into smaller parts</h4></div>
+    <div class="dropzone" data-category="abstraction"><h3>Abstraction</h3><h4>Focus on what matters</h4></div>
+    <div class="dropzone" data-category="pattern"><h3>Pattern Recognition</h3><h4>Notice repeated problems</h4></div>
+    <div class="dropzone" data-category="algorithm"><h3>Algorithmic Thinking</h3><h4>Step-by-step solutions</h4></div>
 </div>
 
 <br><br>
 <button onclick="checkAnswers()">Check Answers</button>
+<br>
+<p id="resultMessage" style="font-size: 18px; font-weight: bold;"></p>
 
 <script>
     const draggables = document.querySelectorAll('.draggable');
@@ -131,21 +137,45 @@
     });
 	
 	function checkAnswers() {
-    const items = document.querySelectorAll('.draggable');
+		const items = document.querySelectorAll('.draggable');
+		let allCorrect = true;
 
-    items.forEach(item => {
-        const correctCategory = item.dataset.answer;
-        const parentZone = item.parentElement;
-        const placedCategory = parentZone.dataset.category;
+		items.forEach(item => {
+			const correctCategory = item.dataset.answer;
+			const parentZone = item.parentElement;
+			const placedCategory = parentZone.dataset.category;
 
-        if (correctCategory === placedCategory) {
-            item.style.backgroundColor = "#4CAF50"; // green
-        } else {
-            item.style.backgroundColor = "#FFD54F"; // yellow
-        }
+			if (correctCategory === placedCategory) {
+				item.style.backgroundColor = "#4CAF50"; // green
+			} else {
+				item.style.backgroundColor = "#FFD54F"; // yellow
+				allCorrect = false;
+			}
+		});
+
+		const message = document.getElementById("resultMessage");
+
+		if (allCorrect) {
+			message.textContent = "🎉 Congratulations! You got them all correct!";
+			launchConfetti();
+		} else {
+			message.textContent = "Some are incorrect — try again!";
+		}
+	}
+	
+
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
     });
 }
 </script>
-
 </body>
 </html>
