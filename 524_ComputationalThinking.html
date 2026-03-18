@@ -15,13 +15,20 @@
     }
 
     .container {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 30px;
-    }
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 10px;
+		margin-top: 30px;
+	}
+	
+	@media (max-width: 800px) {
+		.container {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
 
     .dropzone {
-        width: 22%;
+        width: 90%;
         min-height: 200px;
         border: 2px dashed #999;
         border-radius: 10px;
@@ -55,6 +62,24 @@
         flex-wrap: wrap;
         justify-content: center;
     }
+	
+	button {
+		display: inline-block;
+		width: 180px;
+		padding: 10px;
+		margin: 20px auto;
+		background-color: white;
+		color: #4CAF50;
+		border: 2px solid #4CAF50;
+		border-radius: 5px;
+		cursor: pointer;
+		font-size: 16px;
+	}
+
+	button:hover {
+		background-color: #4CAF50;
+		color: white;
+	}
 </style>
 </head>
 
@@ -63,22 +88,25 @@
 <h2>Sort the Ideas into the Correct Category</h2>
 
 <div id="items">
-    <div class="draggable" draggable="true">Break problem into steps</div>
-    <div class="draggable" draggable="true">Ignore unnecessary details</div>
-    <div class="draggable" draggable="true">Look for repeated patterns</div>
-    <div class="draggable" draggable="true">Write step-by-step instructions</div>
-    <div class="draggable" draggable="true">Group similar items</div>
-    <div class="draggable" draggable="true">Focus on key information</div>
-    <div class="draggable" draggable="true">Identify similarities</div>
-    <div class="draggable" draggable="true">Create a clear process</div>
+    <div class="draggable" draggable="true" data-answer="decomposition">Know the current time</div>
+    <div class="draggable" draggable="true" data-answer="decomposition">Know when the appointment is</div>
+    <div class="draggable" draggable="true" data-answer="pattern">Joe often forgets to check the time</div>
+    <div class="draggable" draggable="true" data-answer="pattern">Joe is late to many appointments</div>
+    <div class="draggable" draggable="true" data-answer="abstraction">Joe needs a reminder at the right time</div>
+    <div class="draggable" draggable="true" data-answer="abstraction">Focus on alerting Joe, not just showing time</div>
+    <div class="draggable" draggable="true" data-answer="algorithm">Set an alarm time</div>
+    <div class="draggable" draggable="true" data-answer="algorithm">If the times match, play a sound</div>
 </div>
 
 <div class="container">
-    <div class="dropzone"><h3>Decomposition</h3></div>
-    <div class="dropzone"><h3>Abstraction</h3></div>
-    <div class="dropzone"><h3>Pattern Recognition</h3></div>
-    <div class="dropzone"><h3>Algorithmic Thinking</h3></div>
+    <div class="dropzone" data-category="decomposition"><h3>Decomposition</h3></div>
+    <div class="dropzone" data-category="abstraction"><h3>Abstraction</h3></div>
+    <div class="dropzone" data-category="pattern"><h3>Pattern Recognition</h3></div>
+    <div class="dropzone" data-category="algorithm"><h3>Algorithmic Thinking</h3></div>
 </div>
+
+<br><br>
+<button onclick="checkAnswers()">Check Answers</button>
 
 <script>
     const draggables = document.querySelectorAll('.draggable');
@@ -101,6 +129,22 @@
             zone.appendChild(dragging);
         });
     });
+	
+	function checkAnswers() {
+    const items = document.querySelectorAll('.draggable');
+
+    items.forEach(item => {
+        const correctCategory = item.dataset.answer;
+        const parentZone = item.parentElement;
+        const placedCategory = parentZone.dataset.category;
+
+        if (correctCategory === placedCategory) {
+            item.style.backgroundColor = "#4CAF50"; // green
+        } else {
+            item.style.backgroundColor = "#FFD54F"; // yellow
+        }
+    });
+}
 </script>
 
 </body>
