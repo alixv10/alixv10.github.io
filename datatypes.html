@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Drag and Drop Sorting</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    h2 {
+        margin-top: 20px;
+    }
+	h4 {
+		font-size: 0.9em;
+		font-weight: normal;
+	}
+
+    .container {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 10px;
+		margin-top: 30px;
+	}
+	
+	@media (max-width: 800px) {
+		.container {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+    .dropzone {
+        width: 90%;
+        min-height: 200px;
+        border: 2px dashed #999;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .dropzone h3 {
+        margin-top: 0;
+    }
+
+    .draggable {
+        display: inline-block;      /* prevents full-width stretching */
+        width: 180px;               /* set consistent size */
+        padding: 10px;
+        margin: 8px;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        cursor: grab;
+        text-align: center;
+    }
+
+    .dragging {
+        opacity: 0.5;
+    }
+
+    #items {
+        margin-top: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+	
+	button {
+		display: inline-block;
+		width: 180px;
+		padding: 10px;
+		margin: 20px auto;
+		background-color: white;
+		color: #4CAF50;
+		border: 2px solid #4CAF50;
+		border-radius: 5px;
+		cursor: pointer;
+		font-size: 16px;
+	}
+
+	button:hover {
+		background-color: #4CAF50;
+		color: white;
+	}
+</style>
+</head>
+
+<body>
+
+<h2>Sort the Ideas into the Correct Category</h2>
+
+<div id="items">
+    <div class="draggable" draggable="true" data-answer="float">7.1</div>
+    <div class="draggable" draggable="true" data-answer="integer">10</div>
+    <div class="draggable" draggable="true" data-answer="String">"Charles Darwin"</div>
+    <div class="draggable" draggable="true" data-answer="String">"Computer Science"</div>
+    <div class="draggable" draggable="true" data-answer="float">15.457</div>
+    <div class="draggable" draggable="true" data-answer="integer">-40</div>
+    <div class="draggable" draggable="true" data-answer="String">"this is a variable"</div>
+    <div class="draggable" draggable="true" data-answer="float">-20.6</div>
+</div>
+
+<div class="container">
+    <div class="dropzone" data-category="String"><h3>String</h3><h4>A word or multiple words within quotations</h4></div>
+    <div class="dropzone" data-category="integer"><h3>integer</h3><h4>Any whole number</h4></div>
+    <div class="dropzone" data-category="float"><h3>float</h3><h4>Any number with decimals</h4></div>
+</div>
+
+<br><br>
+<button onclick="checkAnswers()">Check Answers</button>
+<br>
+<p id="resultMessage" style="font-size: 18px; font-weight: bold;"></p>
+
+<script>
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+
+    draggables.forEach(item => {
+        item.addEventListener('dragstart', () => {
+            item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
+        });
+    });
+
+    dropzones.forEach(zone => {
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            const dragging = document.querySelector('.dragging');
+            zone.appendChild(dragging);
+        });
+    });
+	
+	function checkAnswers() {
+		const items = document.querySelectorAll('.draggable');
+		let allCorrect = true;
+
+		items.forEach(item => {
+			const correctCategory = item.dataset.answer;
+			const parentZone = item.parentElement;
+			const placedCategory = parentZone.dataset.category;
+
+			if (correctCategory === placedCategory) {
+				item.style.backgroundColor = "#4CAF50"; // green
+			} else {
+				item.style.backgroundColor = "#FFD54F"; // yellow
+				allCorrect = false;
+			}
+		});
+
+		const message = document.getElementById("resultMessage");
+
+		if (allCorrect) {
+			message.textContent = "🎉 Congratulations! You got them all correct!";
+			launchConfetti();
+		} else {
+			message.textContent = "Some are incorrect — try again!";
+		}
+	}
+	
+
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+</script>
+</body>
+</html>
