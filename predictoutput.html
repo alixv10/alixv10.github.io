@@ -85,6 +85,15 @@ num = num - 6
     What is the value of num: <input type="text" id="q4">
 </div>
 
+<div class="question">
+    <pre>
+x = 2
+x = x * 3
+x = x + 4
+    </pre>
+    What is the value of x: <input type="text" id="q5">
+</div>
+
 <button onclick="checkAnswers()">Check Answers</button>
 
 <script>
@@ -93,7 +102,8 @@ function checkAnswers() {
         q1: "6",
         q2: "15",
         q3: "12",
-        q4: "14"
+        q4: "14",
+		q5: "10"
     };
 
     for (let key in answers) {
