@@ -70,7 +70,7 @@
 		<pre>
   score = 10
   score = score + 5
-			
+  
 		</pre>
 		What is the value of score: <input type="text" id="q2">
 	</div>
@@ -88,7 +88,7 @@
 		<pre>
   num = 20
   num = num - 6
-			
+  
 		</pre>
 		What is the value of num: <input type="text" id="q4">
 	</div>
@@ -101,6 +101,14 @@
 		</pre>
 		What is the value of x: <input type="text" id="q5">
 	</div>
+	<div class="question">
+		<pre>
+  i = 5
+  d = i / 2
+  
+		</pre>
+		What is the value of d: <input type="text" id="q6">
+	</div>
 </div>
 <button onclick="checkAnswers()">Check Answers</button>
 
@@ -111,7 +119,8 @@ function checkAnswers() {
         q2: "15",
         q3: "12",
         q4: "14",
-		q5: "10"
+		q5: "10",
+		q6: "2.5"
     };
 
     for (let key in answers) {
