@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predict the Output</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+			text-align: center;
+        }
+
+		.allquestions {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+		}
+		
+        .question {
+            margin-bottom: 25px;
+			width: 200px;
+			text-align: left;
+			margin-left: auto;
+			margin-right: auto;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        input {
+            padding: 8px;
+            width: 150px;
+            font-size: 16px;
+        }
+
+        .correct {
+            border: 3px solid green;
+            background-color: #e6ffe6;
+        }
+
+        .incorrect {
+            border: 3px solid red;
+            background-color: #ffe6e6;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Predict the Output</h2>
+<p>Look at each Python code snippet. What will the output for each be? If you think it won't print anything, leave the box blank</p>
+
+<div class="allquestions">
+	<div class="question">
+		<pre>
+  age = 15
+  if age >= 13 :
+     print("You can watch this movie")
+		</pre>
+		Output: <input type="text" id="q1">
+	</div>
+
+	<div class="question">
+		<pre>
+  age = 9
+  if age >= 13 :
+     print("You can watch this movie")
+		</pre>
+		Output: <input type="text" id="q2">
+	</div>
+
+	<div class="question">
+		<pre>
+  weather = "Sunny"
+  if weather == "Sunny" :
+     print("You should go outside")
+		</pre>
+		Output: <input type="text" id="q3">
+	</div>
+
+	<div class="question">
+		<pre>
+  age = 19
+  if age == 19 :
+     print("You are 19")
+		</pre>
+		Output: <input type="text" id="q4">
+	</div>
+
+	<div class="question">
+		<pre>
+  score = 50
+  if score < 50 :
+     print("You did not pass")
+		</pre>
+		Output: <input type="text" id="q5">
+	</div>
+	<div class="question">
+		<pre>
+  password = "12345"
+  if password !=  "topsecretpassword":
+     print("That's not the password")
+		</pre>
+		Output: <input type="text" id="q6">
+	</div>
+</div>
+<button onclick="checkAnswers()">Check Answers</button>
+
+<script>
+function checkAnswers() {
+    const answers = {
+        q1: "You can watch this movie",
+        q2: "",
+        q3: "You should go outside",
+        q4: "You are 19",
+		q5: "",
+		q6: "That's not the password"
+    };
+
+    for (let key in answers) {
+        let input = document.getElementById(key);
+        let userAnswer = input.value.trim();
+		let allCorrect = true;
+
+        input.classList.remove("correct", "incorrect");
+
+        if (userAnswer === answers[key]) {
+            input.classList.add("correct");
+        } else {
+            input.classList.add("incorrect");
+			allCorrect = false;
+        }
+		
+		if (allCorrect) {
+			launchConfetti();
+		}
+    }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+</script>
+</body>
+</html>
