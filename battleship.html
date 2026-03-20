@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Battleship</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 35px);
+    grid-gap: 3px;
+    justify-content: center;
+    margin: 20px;
+}
+
+.cell {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #999;
+    cursor: pointer;
+    background-color: #e0f7fa;
+}
+
+.cell.ship {
+    background-color: #4CAF50;
+}
+
+.cell.hit {
+    background-color: red;
+}
+
+.cell.miss {
+    background-color: #ccc;
+}
+
+.cell.recent {
+    background-color: #FFD54F !important; /* yellow */
+}
+
+#status {
+    font-weight: bold;
+}
+
+#turnCounter {
+	display: none;
+}
+
+.boards-container {
+    display: flex;
+    flex-direction: column; /* default: stacked */
+    align-items: center;
+    gap: 20px;
+}
+
+/* Side-by-side when screen is wide enough */
+@media (min-width: 800px) {
+    .boards-container {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h2>Battleship</h2>
+<p id="status">Place your ships</p>
+<p id="turnCounter">Turn: 1</p>
+
+<div class="boards-container">
+
+    <div>
+        <h3>Your Board</h3>
+        <div id="playerBoard" class="board"></div>
+    </div>
+
+    <div>
+        <h3>Computer Board</h3>
+        <div id="computerBoard" class="board"></div>
+    </div>
+
+</div>
+
+<script>
+const SIZE = 10;
+const SHIPS = [5, 4, 3, 3, 2];
+
+let playerBoard = [];
+let computerBoard = [];
+let playerShips = [];
+let computerShips = [];
+
+let placingShipIndex = 0;
+let gameStarted = false;
+
+let computerTargets = []; // smart targeting
+
+let lastPlayerCell = null;
+let lastComputerCell = null;
+
+let turnNumber = 1;
+let gameOver = false;
+
+// Create boards
+function createBoard(boardElement, boardArray, clickHandler) {
+    for (let i = 0; i < SIZE * SIZE; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = i;
+        cell.addEventListener("click", clickHandler);
+        boardElement.appendChild(cell);
+        boardArray.push(0);
+    }
+}
+
+// Place ships (simple horizontal placement)
+function placeShip(board, index, size) {
+    if (index % SIZE + size > SIZE) return false;
+
+    for (let i = 0; i < size; i++) {
+        if (board[index + i] !== 0) return false;
+    }
+
+    for (let i = 0; i < size; i++) {
+        board[index + i] = 1;
+    }
+
+    return true;
+}
+
+// Player placing ships
+function handlePlayerPlacement(e) {
+    if (gameStarted) return;
+
+    const index = parseInt(e.target.dataset.index);
+    const size = SHIPS[placingShipIndex];
+
+    if (placeShip(playerBoard, index, size)) {
+        for (let i = 0; i < size; i++) {
+            document.querySelectorAll("#playerBoard .cell")[index + i].classList.add("ship");
+        }
+
+        placingShipIndex++;
+
+        if (placingShipIndex >= SHIPS.length) {
+            document.getElementById("status").textContent = "Game started! Attack the computer.";
+            gameStarted = true;
+            placeComputerShips();
+			document.getElementById("turnCounter").style.display = "block";
+        } else {
+            document.getElementById("status").textContent = "Place ship of size " + SHIPS[placingShipIndex];
+        }
+    }
+}
+
+// Random computer ship placement
+function placeComputerShips() {
+    SHIPS.forEach(size => {
+        let placed = false;
+        while (!placed) {
+            const index = Math.floor(Math.random() * SIZE * SIZE);
+            placed = placeShip(computerBoard, index, size);
+        }
+    });
+}
+
+// Update number of turns
+function updateTurnDisplay() {
+    document.getElementById("turnCounter").textContent = "Turn: " + turnNumber;
+}
+
+// Check if someone has won
+function checkGameOver(board) {
+    // If no "1" remains, all ships are sunk
+    return !board.includes(1);
+}
+
+// Player attack
+function handlePlayerAttack(e) {
+    if (!gameStarted || gameOver) return;
+
+    const index = parseInt(e.target.dataset.index);
+    const cell = e.target;
+
+    if (computerBoard[index] !== 0 && computerBoard[index] !== 1) return;
+
+    if (lastPlayerCell) {
+        lastPlayerCell.classList.remove("recent");
+    }
+
+    cell.classList.add("recent");
+    lastPlayerCell = cell;
+
+    setTimeout(() => {
+        if (computerBoard[index] === 1) {
+            computerBoard[index] = 2;
+            cell.classList.remove("recent");
+            cell.classList.add("hit");
+            computerTargets.push(index);
+        } else {
+            computerBoard[index] = -1;
+            cell.classList.remove("recent");
+            cell.classList.add("miss");
+        }
+
+        // Check if player won
+        if (checkGameOver(computerBoard)) {
+            document.getElementById("status").textContent = "🎉 You win!";
+            gameOver = true;
+            return;
+        }
+
+        // Computer turn
+        setTimeout(() => {
+            computerTurn();
+
+            // After computer turn completes, increment turn
+            turnNumber++;
+            updateTurnDisplay();
+        }, 400);
+
+    }, 500);
+}
+
+// Computer turn (smart-ish)
+function computerTurn() {
+    if (gameOver) return;
+
+    let index;
+
+    if (computerTargets.length > 0) {
+        const lastHit = computerTargets[computerTargets.length - 1];
+        const directions = [-1, 1, -SIZE, SIZE];
+
+        const possible = directions
+            .map(d => lastHit + d)
+            .filter(i =>
+                i >= 0 &&
+                i < SIZE * SIZE &&
+                (playerBoard[i] === 0 || playerBoard[i] === 1)
+            );
+
+        if (possible.length > 0) {
+            index = possible[Math.floor(Math.random() * possible.length)];
+        }
+    }
+
+    if (index === undefined) {
+        do {
+            index = Math.floor(Math.random() * SIZE * SIZE);
+        } while (!(playerBoard[index] === 0 || playerBoard[index] === 1));
+    }
+
+    const cell = document.querySelectorAll("#playerBoard .cell")[index];
+
+    if (lastComputerCell) {
+        lastComputerCell.classList.remove("recent");
+    }
+
+    cell.classList.add("recent");
+    lastComputerCell = cell;
+
+    setTimeout(() => {
+        if (playerBoard[index] === 1) {
+            playerBoard[index] = 2;
+            cell.classList.remove("recent");
+            cell.classList.add("hit");
+            computerTargets.push(index);
+        } else {
+            playerBoard[index] = -1;
+            cell.classList.remove("recent");
+            cell.classList.add("miss");
+        }
+
+        // Check if computer won
+        if (checkGameOver(playerBoard)) {
+            document.getElementById("status").textContent = "💻 Computer wins!";
+            gameOver = true;
+        }
+
+    }, 500);
+}
+
+// Initialize
+createBoard(document.getElementById("playerBoard"), playerBoard, handlePlayerPlacement);
+createBoard(document.getElementById("computerBoard"), computerBoard, handlePlayerAttack);
+
+document.getElementById("status").textContent = "Place ship of size " + SHIPS[0];
+
+</script>
+
+</body>
+</html>
