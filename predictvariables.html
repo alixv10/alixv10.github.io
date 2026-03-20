@@ -126,6 +126,7 @@ function checkAnswers() {
     for (let key in answers) {
         let input = document.getElementById(key);
         let userAnswer = input.value.trim();
+		let allCorrect = true;
 
         input.classList.remove("correct", "incorrect");
 
@@ -133,10 +134,24 @@ function checkAnswers() {
             input.classList.add("correct");
         } else {
             input.classList.add("incorrect");
+			allCorrect = false;
         }
+		
+		if (allCorrect) {
+			launchConfetti();
+		}
     }
 }
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+</script>
 </body>
 </html>
