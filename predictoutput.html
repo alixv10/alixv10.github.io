@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predict the Output</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+			text-align: center;
+        }
+
+        .question {
+            margin-bottom: 25px;
+			width: 200px;
+			text-align: left;
+			margin-left: auto;
+			margin-right: auto;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        input {
+            padding: 8px;
+            width: 150px;
+            font-size: 16px;
+        }
+
+        .correct {
+            border: 3px solid green;
+            background-color: #e6ffe6;
+        }
+
+        .incorrect {
+            border: 3px solid red;
+            background-color: #ffe6e6;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Predict the Output</h2>
+<p>Look at each Python code snippet. What will the final value be?</p>
+
+<div class="question">
+    <pre>
+x = 4
+y = 2
+z = x + y
+    </pre>
+    What is the value of z: <input type="text" id="q1">
+</div>
+
+<div class="question">
+    <pre>
+score = 10
+score = score + 5
+    </pre>
+    What is the value of score: <input type="text" id="q2">
+</div>
+
+<div class="question">
+    <pre>
+a = 3
+b = 4
+c = a * b
+    </pre>
+    What is the value of c: <input type="text" id="q3">
+</div>
+
+<div class="question">
+    <pre>
+num = 20
+num = num - 6
+    </pre>
+    What is the value of num: <input type="text" id="q4">
+</div>
+
+<button onclick="checkAnswers()">Check Answers</button>
+
+<script>
+function checkAnswers() {
+    const answers = {
+        q1: "6",
+        q2: "15",
+        q3: "12",
+        q4: "14"
+    };
+
+    for (let key in answers) {
+        let input = document.getElementById(key);
+        let userAnswer = input.value.trim();
+
+        input.classList.remove("correct", "incorrect");
+
+        if (userAnswer === answers[key]) {
+            input.classList.add("correct");
+        } else {
+            input.classList.add("incorrect");
+        }
+    }
+}
+</script>
+
+</body>
+</html>
