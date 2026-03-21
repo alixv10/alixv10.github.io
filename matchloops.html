@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match the Output to the For Loop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+
+        .bank-title {
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        .output-bank {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .draggable {
+            background: #f4f4f4;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 12px;
+            width: 160px;
+            cursor: grab;
+            text-align: left;
+            white-space: pre-line;
+        }
+
+        .allquestions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto 25px auto;
+        }
+
+        .question {
+            width: 360px;
+            text-align: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .dropzone {
+            min-height: 70px;
+            border: 2px dashed #999;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            background: #fafafa;
+        }
+
+        .dropzone.hovered {
+            background: #eef6ff;
+            border-color: #4a90e2;
+        }
+
+        .dropzone.correct {
+            border: 3px solid green;
+            background-color: #e6ffe6;
+        }
+
+        .dropzone.incorrect {
+            border: 3px solid red;
+            background-color: #ffe6e6;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Match the Output to the For Loop</h2>
+<p>Drag each output into the correct box under the matching Python code.</p>
+
+<h3 class="bank-title">Output Bank</h3>
+<div class="output-bank" id="bank">
+    <div class="draggable" draggable="true" id="outA" data-answer="A">Hi
+Hi
+Hi</div>
+
+    <div class="draggable" draggable="true" id="outB" data-answer="B">Start
+0
+1
+Done</div>
+
+    <div class="draggable" draggable="true" id="outC" data-answer="C">1
+1
+1
+Bye</div>
+
+    <div class="draggable" draggable="true" id="outD" data-answer="D">0
+1
+2
+Bye</div>
+</div>
+
+<div class="allquestions">
+    
+    <div class="question">
+        <pre>for i in range(3):
+    print(i)
+print("Bye")</pre>
+        <div class="dropzone" data-correct="D"></div>
+    </div>
+	
+	<div class="question">
+        <pre>for i in range(3):
+    print("Hi")</pre>
+        <div class="dropzone" data-correct="A"></div>
+    </div>
+
+	<div class="question">
+        <pre>for i in range(3):
+    print(1)
+print("Bye")</pre>
+        <div class="dropzone" data-correct="C"></div>
+    </div>
+	
+    <div class="question">
+        <pre>print("Start")
+for i in range(2):
+    print(i)
+print("Done")</pre>
+        <div class="dropzone" data-correct="B"></div>
+    </div>
+
+    
+</div>
+
+<button onclick="checkAnswers()">Check Answers</button>
+
+<script>
+let draggedItem = null;
+
+const draggables = document.querySelectorAll('.draggable');
+const dropzones = document.querySelectorAll('.dropzone');
+const bank = document.getElementById('bank');
+
+draggables.forEach(item => {
+    item.addEventListener('dragstart', function () {
+        draggedItem = this;
+        setTimeout(() => {
+            this.style.opacity = '0.5';
+        }, 0);
+    });
+
+    item.addEventListener('dragend', function () {
+        this.style.opacity = '1';
+    });
+});
+
+dropzones.forEach(zone => {
+    zone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        this.classList.add('hovered');
+    });
+
+    zone.addEventListener('dragleave', function () {
+        this.classList.remove('hovered');
+    });
+
+    zone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        this.classList.remove('hovered');
+
+        if (draggedItem) {
+            if (this.children.length > 0) {
+                bank.appendChild(this.children[0]);
+            }
+            this.appendChild(draggedItem);
+        }
+    });
+});
+
+bank.addEventListener('dragover', function (e) {
+    e.preventDefault();
+});
+
+bank.addEventListener('drop', function (e) {
+    e.preventDefault();
+    if (draggedItem) {
+        bank.appendChild(draggedItem);
+    }
+});
+
+function checkAnswers() {
+    let allCorrect = true;
+
+    dropzones.forEach(zone => {
+        zone.classList.remove('correct', 'incorrect');
+
+        if (zone.children.length === 0) {
+            zone.classList.add('incorrect');
+            allCorrect = false;
+            return;
+        }
+
+        const dropped = zone.children[0].getAttribute('data-answer');
+        const correct = zone.getAttribute('data-correct');
+
+        if (dropped === correct) {
+            zone.classList.add('correct');
+        } else {
+            zone.classList.add('incorrect');
+            allCorrect = false;
+        }
+    });
+
+    if (allCorrect) {
+        launchConfetti();
+    }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+</script>
+
+</body>
+</html>
