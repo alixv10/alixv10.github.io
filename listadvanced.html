@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List Function Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .allquestions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto 25px auto;
+        }
+
+        .question {
+            width: 300px;
+            text-align: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input {
+            padding: 8px;
+            width: 250px;
+            font-size: 16px;
+        }
+
+        .correct {
+            border: 3px solid green;
+            background-color: #e6ffe6;
+        }
+
+        .incorrect {
+            border: 3px solid red;
+            background-color: #ffe6e6;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        label {
+            display: block;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Predict the Final List</h2>
+<p>Look at each Python code snippet. What will the list look like at the end?</p>
+
+<div class="allquestions">
+    <div class="question">
+        <pre>
+fruits = ["apple", "banana"]
+fruits.append("orange")
+fruits.insert(1, "grape")
+        </pre>
+
+        <label for="q1">Final list:</label>
+        <input type="text" id="q1">
+    </div>
+
+    <div class="question">
+        <pre>
+numbers = [1, 2, 3, 4]
+numbers.remove(2)
+numbers.append(5)
+numbers.reverse()
+        </pre>
+
+        <label for="q2">Final list:</label>
+        <input type="text" id="q2">
+    </div>
+
+    <div class="question">
+        <pre>
+colors = ["red", "blue", "green"]
+colors.insert(0, "yellow")
+colors.remove("blue")
+colors.reverse()
+        </pre>
+
+        <label for="q3">Final list:</label>
+        <input type="text" id="q3">
+    </div>
+	
+	<div class="question">
+        <pre>
+ages = [10, 12, 8, 7]
+ages[1] = 13
+ages.append(8)
+ages.remove(8)
+        </pre>
+
+        <label for="q4">Final list:</label>
+        <input type="text" id="q4">
+    </div>
+</div>
+
+<button onclick="checkAnswers()">Check Answers</button>
+
+<script>
+function normalizeAnswer(answer) {
+    return answer.replace(/\s+/g, '').trim();
+}
+
+function checkAnswers() {
+    const answers = {
+        q1: '["apple","grape","banana","orange"]',
+        q2: '[5,4,3,1]',
+        q3: '["green","red","yellow"]',
+		q4: '[10, 13, 7, 8]'
+    };
+
+    let allCorrect = true;
+
+    for (let key in answers) {
+        let input = document.getElementById(key);
+        let userAnswer = normalizeAnswer(input.value);
+        let correctAnswer = normalizeAnswer(answers[key]);
+
+        input.classList.remove("correct", "incorrect");
+
+        if (userAnswer === correctAnswer) {
+            input.classList.add("correct");
+        } else {
+            input.classList.add("incorrect");
+            allCorrect = false;
+        }
+    }
+
+    if (allCorrect) {
+        launchConfetti();
+    }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+</script>
+
+</body>
+</html>
