@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lists Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .allquestions {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto 25px auto;
+        }
+
+        .question {
+            width: 500px;
+            text-align: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input {
+            padding: 8px;
+            width: 220px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .correct {
+            border: 3px solid green;
+            background-color: #e6ffe6;
+        }
+
+        .incorrect {
+            border: 3px solid red;
+            background-color: #ffe6e6;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        label {
+            display: block;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Lists Practice</h2>
+<p>Look at each Python list and answer the questions below it.</p>
+
+<div class="allquestions">
+    <div class="question">
+        <pre>
+fruits = ["apple", "banana", "orange", "grape"]
+        </pre>
+
+        <label for="q1">What is the name of the list?</label>
+        <input type="text" id="q1">
+
+        <label for="q2">What is at index 2?</label>
+        <input type="text" id="q2">
+
+        <label for="q3">How many items are in the list?</label>
+        <input type="text" id="q3">
+    </div>
+
+    <div class="question">
+        <pre>
+numbers = [5, 10, 15, 20, 25]
+        </pre>
+
+        <label for="q4">What is the name of the list?</label>
+        <input type="text" id="q4">
+
+        <label for="q5">What is at index 4?</label>
+        <input type="text" id="q5">
+
+        <label for="q6">How would you print the number 10 from this list?</label>
+        <input type="text" id="q6">
+    </div>
+
+    <div class="question">
+        <pre>
+colors = ["red", "blue", "green"]
+        </pre>
+
+        <label for="q7">What is the name of the list?</label>
+        <input type="text" id="q7">
+
+        <label for="q8">What is at index 1?</label>
+        <input type="text" id="q8">
+
+        <label for="q9">How many items are in the list?</label>
+        <input type="text" id="q9">
+    </div>
+</div>
+
+<button onclick="checkAnswers()">Check Answers</button>
+
+<script>
+function checkAnswers() {
+    const answers = {
+        q1: "fruits",
+        q2: "orange",
+        q3: "4",
+        q4: "numbers",
+        q5: "25",
+        q6: "print(numbers[1])",
+        q7: "colors",
+        q8: "blue",
+        q9: "3"
+    };
+
+    let allCorrect = true;
+
+    for (let key in answers) {
+        let input = document.getElementById(key);
+        let userAnswer = input.value.trim();
+
+        input.classList.remove("correct", "incorrect");
+
+        if (userAnswer === answers[key]) {
+            input.classList.add("correct");
+        } else {
+            input.classList.add("incorrect");
+            allCorrect = false;
+        }
+    }
+
+    if (allCorrect) {
+        launchConfetti();
+    }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+function launchConfetti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+    });
+}
+</script>
+
+</body>
+</html>
