@@ -163,6 +163,26 @@ function launchConfetti() {
     });
 }
 </script>
+<script>
+document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("paste", function(e) {
+        e.preventDefault();
+    });
 
+    input.addEventListener("contextmenu", function(e) {
+        e.preventDefault();
+    });
+
+    input.addEventListener("drop", function(e) {
+        e.preventDefault();
+    });
+
+    input.addEventListener("keydown", function(e) {
+        if ((e.ctrlKey || e.metaKey) && ["v", "x", "c"].includes(e.key.toLowerCase())) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
 </body>
 </html>
