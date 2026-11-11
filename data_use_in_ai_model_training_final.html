@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Use in AI Model Training</title>
+<style>
+:root{--ink:#26333b;--muted:#66747b;--paper:#f5f4ef;--surface:#fffefa;--line:#d9dedb;--teal:#315f60;--gold:#9b743d;--blue:#526b91;--purple:#796287}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:28px 18px 42px;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(1050px,100%);margin:auto}header{text-align:center;margin-bottom:18px}h1{margin:0;font:600 clamp(1.8rem,4vw,2.55rem)/1.15 Georgia,serif;letter-spacing:-.025em}.subhead{margin:10px auto 0;max-width:650px;color:var(--muted);font-size:.96rem;line-height:1.5}
+.stage{margin:22px 0 8px;text-align:center;color:var(--muted);font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.map{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;grid-template-rows:150px 180px;gap:12px;align-items:center;justify-items:center}
+.topic{width:clamp(118px,14vw,150px);aspect-ratio:1;border:1px solid var(--tone);border-radius:50%;background:var(--tint);color:var(--ink);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;padding:15px;text-align:center;cursor:pointer;box-shadow:0 4px 12px #2531380a;transition:transform .18s,box-shadow .18s,opacity .45s}
+.topic:hover,.topic:focus-visible{transform:translateY(-3px);box-shadow:0 12px 32px #24313814;outline:3px solid color-mix(in srgb,var(--tone) 25%,transparent);outline-offset:2px}
+.topic[aria-pressed=true]{border:3px solid var(--tone);box-shadow:0 0 0 5px color-mix(in srgb,var(--tone) 13%,transparent),0 12px 32px #24313814}
+.num{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:var(--tone);color:white;font-size:.78rem;font-weight:750}.name{font-size:.88rem;line-height:1.2;font-weight:700}.by{color:var(--muted);font-size:.68rem;line-height:1.15}
+.teal{--tone:var(--teal);--tint:#e6efec}.gold{--tone:var(--gold);--tint:#f4eddf}.blue{--tone:var(--blue);--tint:#e9edf4}.purple{--tone:var(--purple);--tint:#f0ebf3}
+.p1{grid-area:1/1}.p2{grid-area:1/2}.p3{grid-area:1/3}.p4{grid-area:1/4}.p5{grid-area:1/5}.p6{grid-area:2/1}.p7{grid-area:2/5}
+.question{grid-area:2/2/2/5;align-self:stretch;width:100%;display:flex;flex-direction:column;justify-content:center;padding:15px 7px;text-align:center;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .7s,transform .7s}
+.question.visible{opacity:1;transform:none;pointer-events:auto}.question h2{margin:0 0 10px;font:600 clamp(1.08rem,2.2vw,1.35rem)/1.22 Georgia,serif}.question p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.45}
+.new{opacity:0;transform:scale(.88);pointer-events:none}.new.revealed{opacity:1;transform:scale(1);pointer-events:auto}
+.progress{margin:12px 0 0;text-align:center;color:var(--muted);font-size:.78rem}.progress strong{color:var(--ink)}
+.detail{display:grid;grid-template-columns:1fr;gap:18px;margin:24px 0 0}.card{min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:21px 23px;box-shadow:0 4px 16px #24313809}.detailcard{min-height:190px}.eyebrow{color:var(--muted);font-size:.7rem;font-weight:750;letter-spacing:.11em;text-transform:uppercase}.detailcard h2{margin:8px 0 10px;font:600 1.35rem/1.2 Georgia,serif}.detailcard p{margin:0;color:#4d5a61;line-height:1.62;font-size:.93rem}.detailcard .note{margin-top:12px;color:var(--muted);font-size:.82rem}.empty{color:#879198!important;font-style:italic}
+.sources h3{margin:0 0 12px;font-size:.88rem}.source{padding:10px 11px;border:1px solid transparent;border-radius:9px;color:#58656c;font-size:.79rem;line-height:1.4;transition:background .2s,border-color .2s}.source strong{display:block;color:var(--ink);font-size:.8rem}.source.active{background:#e6efec;border-color:#a8c3ba;color:var(--ink)}.source a{display:inline-block;margin-top:8px;color:var(--teal);font-size:.78rem;text-underline-offset:3px}
+@media(max-width:680px){body{padding:23px 12px 32px}.map{grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);gap:12px 7px}.topic{width:min(39vw,145px)}.p1{grid-area:1/1}.p2{grid-area:1/2}.p3{grid-area:2/1}.p4{grid-area:2/2}.p5{grid-area:3/1}.question{grid-area:3/2;min-height:145px;padding:8px 4px}.p6{grid-area:4/1}.p7{grid-area:4/2}.detail{grid-template-columns:1fr}.card{padding:18px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+.continue {display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 26px; margin-top: 20px; background: transparent; color: #d6b77a; border: 1px solid #d6b77a; border-radius: 30px; font-family: inherit; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease;}
+.continue::after { content: "→"; font-size: 1.1rem; transition: transform 0.3s ease;}
+.continue:hover { background: #d6b77a; color: #202020; box-shadow: 0 0 18px rgba(214, 183, 122, 0.2);}
+.continue:hover::after { transform: translateX(4px);}
+.continue:focus-visible { outline: 2px solid #d6b77a; outline-offset: 4px;}
+#tension-card { display: none; opacity: 0; transform: translateY(15px);}
+#tension-card.visible { display: block; animation: tensionFadeIn 0.8s ease forwards;}
+#rag-reflection { display: none; opacity: 0; transform: translateY(15px);}
+#rag-reflection.visible { display: block; animation: tensionFadeIn 0.8s ease forwards;}
+@keyframes tensionFadeIn { to { opacity: 1; transform: translateY(0); }}
+#rag-reflection .note { margin-top: 28px; padding: 18px 22px; border-left: 3px solid #d6b77a; background: rgba(214, 183, 122, 0.08); font-size: 0.9rem; line-height: 1.6;}
+#rag-reflection .note p:last-child { margin-bottom: 0;}
+</style>
+</head>
+<body><main>
+<header><h1>Data Use in AI Model Training</h1><p class="subhead">Explore the different ways data can be included, excluded, restricted, or misrepresented in the systems used to train AI.</p></header>
+<!--<div class="stage" id="stage">Explore the first set of ideas</div>-->
+<section class="map" aria-label="Interactive map of data use and exclusion">
+<button class="topic teal p1" data-id="decommission" aria-pressed="false"><span class="num">1</span><span class="name">Dataset decommissioning</span><span class="by">Crawford &amp; Paglen</span></button>
+<button class="topic gold p2" data-id="user" aria-pressed="false"><span class="num">2</span><span class="name">Companies exclude user data</span><span class="by">Liesenfeld &amp; Dingemanse</span></button>
+<button class="topic blue p3" data-id="narrow" aria-pressed="false"><span class="num">3</span><span class="name">Narrow source selection</span><span class="by">Illingworth &amp; Forsyth</span></button>
+<button class="topic blue p4" data-id="missing" aria-pressed="false"><span class="num">4</span><span class="name">Perspectives left out</span><span class="by">Illingworth &amp; Forsyth</span></button>
+<button class="topic blue p5" data-id="balanced" aria-pressed="false"><span class="num">5</span><span class="name">Building balanced datasets</span><span class="by">Illingworth &amp; Forsyth</span></button>
+<div class="question" id="question"><h3>Can these articles help to answer these two questions?</h3><p>What happens when individuals or organizations choose to withhold their data from AI training? Could this unintentionally perpetuate or increase bias in AI systems?</p><button class="continue">Keep Exploring</button></div>
+<button class="topic purple p6 new" data-id="copyright" aria-pressed="false" tabindex="-1"><span class="num">6</span><span class="name">Copyright, opt-outs &amp; control</span><span class="by">Buick</span></button>
+<button class="topic purple p7 new" data-id="proxy" aria-pressed="false" tabindex="-1"><span class="num">7</span><span class="name">When data is a poor proxy</span><span class="by">Obermeyer et al.</span></button>
+</section>
+<p class="progress" id="progress" aria-live="polite"><strong>0 of 5</strong> ideas explored</p>
+<section class="detail">
+<article class="card detailcard" aria-live="polite"><h2 id="title">Data is not simply included or excluded</h2><p id="description" class="empty">Each circle represents a different decision, practice, or problem related to the data used in AI model training. Select any circle to read more and see which article it comes from.</p><p class="note" id="note"></p></article>
+<aside class="card sources"><h3>Articles</h3><div id="sourceList">
+<div class="source" data-source="cp"><strong>Crawford &amp; Paglen (2021)</strong>Image datasets and the politics of machine learning.</div>
+<div class="source" data-source="ld"><strong>Liesenfeld &amp; Dingemanse (2024)</strong>Open source claims and the exclusion of data from training.</div>
+<div class="source" data-source="if"><strong>Illingworth &amp; Forsyth (2026)</strong>Ethical and social implications of GenAI in higher education.</div>
+<div class="source" data-source="buick"><strong>Buick (2024)</strong>Copyright, transparency, and AI training data.</div>
+<div class="source" data-source="obermeyer"><strong>Obermeyer et al. (2019)</strong>Racial bias in a healthcare algorithm.</div>
+</div></aside>
+<section id="tension-card" class="card">
+  <p class="eyebrow">Final reflection</p>
+  <h2>Whose rights, and whose representation?</h2>
+  <p>
+    Have you noticed the tension between protecting the rights of
+    individuals and organizations to control how their data is used,
+    and ensuring that AI systems represent a broad range of people
+    and perspectives?
+  </p>
+  <p>
+    Individuals and organizations have legitimate reasons to withhold
+    their information or creative work from AI training. Respecting
+    those choices is important. However, when data is withheld or
+    excluded, the resulting datasets may become less representative
+    of the people and perspectives an AI system is meant to serve.
+  </p>
+  <p>
+    At the same time, simply adding more data does not automatically
+    reduce bias or prevent misrepresentation. The way data is
+    selected, measured, and interpreted matters just as much as
+    its quantity.
+  </p>
+  <p>
+    This leaves us with a new and difficult question: how can we respect
+    people's rights to control their data while also working toward
+    AI systems that represent society more fairly?
+  </p>
+</section>
+<section id="rag-reflection" class="card">
+  <p class="eyebrow">Putting it into practice</p>
+  <h2>What happens when we give AI more information?</h2>
+  <p>
+    To explore this further, these articles were used in UBC's HelpMe
+    Retrieval-Augmented Generation (RAG) system. Unlike a general
+    AI model that may draw on information from its broader training,
+    a RAG system retrieves information from a defined collection
+    of documents, or corpus, to help generate its response.
+  </p>
+  <p>
+    In my first attempt, the system struggled to answer my question
+    using the articles available in its original corpus. I then
+    expanded the corpus by curating and adding the two articles by 
+	Obermeyer et al. and Buick which I selected for
+    their relevance to my research question.
+  </p>
+  <p>
+    The second attempt produced a different result. Although the
+    system had access to more articles, it retrieved only one:
+    an article I had deliberately included because of its connection
+    to my question. However, rather than addressing the withholding of
+	data from data sets used to train AI models, the
+    response focused on companies intentionally withholding
+    information about their training datasets, potentially to
+    protect themselves from copyright infringement or for other
+    reasons.
+  </p>
+  <p>
+    The system had found a relevant source, but it appeared to
+    interpret my question differently from how I intended it.
+    Adding more information improved the opportunity to retrieve
+    a relevant article, but it did not guarantee that the system
+    would understand the broader issue I was investigating and 
+	correctly answer my question.
+  </p>
+  <h3>What does this tell us?</h3>
+  <p>
+    This experiment highlights another limitation of simply
+    increasing the amount of information available to an AI system.
+    The composition of a corpus matters, but so do the system's
+    retrieval choices and its interpretation of the user's question.
+    Even carefully curated information can be used in unexpected
+    ways or lead to an answer that misses the intended point.
+  </p>
+  <p>
+    Ultimately, more information does not automatically produce
+    more accurate, balanced, or representative answers. We must
+    also consider which sources are selected, which are retrieved,
+    and how the system interprets and uses them.
+  </p>
+  <div class="note">
+	  <strong>Important distinction</strong>
+	  <p>
+		Adding articles to the course corpus and making them available
+		for retrieval by HelpMe is not the same as changing the training
+		data used to develop an AI model. The articles were made
+		available as reference material for the RAG system to retrieve,
+		rather than being used to retrain or modify the underlying model.
+	  </p>
+	  <p>
+		Nevertheless, this exploration was useful in highlighting
+		limitations that remain even in RAG systems with a bounded
+		collection of information to work from. Restricting the sources
+		available to a model does not guarantee that it will retrieve
+		the most relevant information, interpret it as intended, or
+		produce a response that adequately addresses the question.
+	  </p>
+	</div>
+</section>
+</section>
+</main>
+<script>
+const sources={
+cp:{name:"Crawford & Paglen (2021)",cite:"Crawford, K., & Paglen, T. (2021). Excavating AI: The politics of images in machine learning training sets. AI & Society, 36, 1105–1116.",doi:"https://doi.org/10.1007/s00146-021-01162-8"},
+ld:{name:"Liesenfeld & Dingemanse (2024)",cite:"Liesenfeld, A., & Dingemanse, M. (2024). Rethinking open source generative AI: Open-washing and the EU AI Act. Proceedings of the 2024 ACM Conference on Fairness, Accountability, and Transparency, 1774–1784.",doi:"https://doi.org/10.1145/3630106.3659005"},
+if:{name:"Illingworth & Forsyth (2026)",cite:"Illingworth, S., & Forsyth, R. (2026). The Ethical and Social Implications of GenAI in Higher Education. In GenAI in Higher Education: Redefining Teaching and Learning (pp. 37–55). Bloomsbury Academic.",doi:"https://doi.org/10.5040/9781350535824.ch-3"},
+buick:{name:"Buick (2024)",cite:"Buick, A. (2024). Copyright and AI training data—transparency to the rescue? Journal of Intellectual Property Law & Practice, 20(3), 182–195.",doi:"https://doi.org/10.1093/jiplp/jpae102"},
+obermeyer:{name:"Obermeyer et al. (2019)",cite:"Obermeyer, Z., Powers, B., Vogeli, C., & Mullainathan, S. (2019). Dissecting racial bias in an algorithm used to manage the health of populations. Science, 366(6464), 447–453.",doi:"https://doi.org/10.1126/science.aax2342"}
+};
+// Text is based on the article summaries and stewardship notes supplied with the request.
+const topics={
+decommission:{heading:"Datasets can be withdrawn or decommissioned",source:"cp",body:"A dataset may be removed from circulation when its collection, labels, or uses are considered unethical or when it is associated with harmful bias. Crawford and Paglen examine the politics built into image datasets: what is collected, how people and images are categorized, and whose interests those choices serve. Removing a problematic dataset can be an act of accountability, but it also changes what material remains available to train future systems.",note:"Consider the difference between removing harmful data and losing data that could have represented people or experiences otherwise overlooked."},
+user: {heading: "Companies may exclude user data from AI training",source: "ld",body: "Companies may collect information through their products and services without including that information in the datasets used to train their AI models. For example, Meta has stated that it does not use certain information from its products and services in its AI training datasets. Liesenfeld and Dingemanse discuss how excluding certain data sources, and making claims about what data is or is not used, may help companies reduce their legal exposure, including potential copyright-related liability.",note: "If a company collects information about its users but claims that it excludes it from AI training, whose interests does that decision protect? Does it also affect whose experiences and perspectives are represented in the resulting models?"},
+narrow:{heading:"Training sources can reflect a narrow range of viewpoints",source:"if",body:"When training material is drawn from sources that share similar viewpoints, the resulting dataset may not reflect the breadth of perspectives present in society. A large volume of material does not guarantee a broad range of experiences or ideas. The selection of sources shapes what a model is exposed to and what it may be less able to represent.",note:"A dataset can be large and still be limited in perspective."},
+missing:{heading:"Excluding perspectives can produce gaps in representation",source:"if",body:"Leaving particular communities, experiences, or viewpoints out of training material can contribute to an incomplete picture of the world. Illingworth and Forsyth emphasize the potential for bias when data is excluded or when the sources used are too similar. The challenge is not simply to gather more material, but to consider whose knowledge and experiences are represented.",note:"Whose absence might go unnoticed when a dataset is assembled?"},
+balanced:{heading:"Balanced datasets require deliberate choices",source:"if",body:"More representative training data does not happen automatically. It requires attention to the range of sources, perspectives, and experiences included. Illingworth and Forsyth point toward the importance of balanced datasets, while raising broader ethical questions about how GenAI systems are developed and used in education.",note:"Representation is a design and governance question, not just a question of dataset size."},
+copyright:{heading:"Copyright, opt-outs, and the limits of control",source:"buick",body:"Buick examines how copyright law applies to material used to train AI models across different jurisdictions. The article considers opt-out mechanisms and asks whether people or organizations can meaningfully prevent their work from being used—or verify that it was not used. Transparency may reveal what is happening, but knowing that data was used does not by itself give someone control over that use.",note:"Copyright and ownership are legitimate interests. Restricting access should not automatically be framed as harmful to AI development. This article offers a framework for considering rights and unequal control; it is not evidence that withholding copyrighted material necessarily increases bias."},
+proxy:{heading:"Available data can be a misleading proxy for need",source:"obermeyer",body:"Obermeyer and colleagues found that a healthcare algorithm used healthcare spending as a proxy for patients’ health needs. Because Black patients historically received less healthcare spending than white patients with similar needs, the algorithm underestimated the health needs of Black patients. The problem was not simply a lack of data: the variable chosen to stand in for need encoded existing inequality.",note:"This study concerns bias from a proxy variable—not bias directly caused by people withholding training data. Missing data, underrepresentation, and misleading data are different problems."}
+};
+
+const first = ["decommission", "user", "narrow", "missing", "balanced"];
+const later = ["copyright", "proxy"];
+const seen = new Set();
+
+const buttons = [...document.querySelectorAll(".topic")];
+const sourceEls = [...document.querySelectorAll(".source")];
+const $ = id => document.getElementById(id);
+
+let laterShown = false;
+
+function revealLater() {
+  if (laterShown) return;
+
+  later.forEach(x => {
+    const b = document.querySelector(`[data-id="${x}"]`);
+    b.classList.add("revealed");
+    b.removeAttribute("tabindex");
+  });
+
+  laterShown = true;
+  //$("stage").textContent = "Two further perspectives";
+  $("progress").innerHTML =
+    "<strong>All 5 initial ideas explored</strong> · Explore the two further perspectives";
+}
+
+function choose(id) {
+  const t = topics[id];
+  if (!t) return;
+
+  const s = sources[t.source];
+  seen.add(id);
+
+  buttons.forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.id === id))
+  );
+
+  sourceEls.forEach(el =>
+    el.classList.toggle("active", el.dataset.source === t.source)
+  );
+
+  
+  $("title").textContent = t.heading;
+  $("description").textContent = t.body;
+  $("description").classList.remove("empty");
+  $("note").textContent = t.note;
+
+  const active = sourceEls.find(el => el.dataset.source === t.source);
+  active.innerHTML = `
+    <strong>${s.name}</strong>${s.cite}<br>
+    <a href="${s.doi}" target="_blank" rel="noopener noreferrer">
+      View article (DOI)
+    </a>`;
+
+  const count = first.filter(x => seen.has(x)).length;
+
+  if (count === 5 && !$("question").classList.contains("visible")) {
+    $("question").classList.add("visible");
+    //$("stage").textContent = "Now consider the choices behind the data";
+    $("progress").innerHTML =
+      "<strong>All 5 initial ideas explored</strong> · Ready to explore further";
+  } 
+  else if (count < 5) {
+    $("progress").innerHTML =
+      `<strong>${count} of 5</strong> initial ideas explored`;
+  } 
+  else if (laterShown) {
+    $("progress").innerHTML =
+      `<strong>All 5 initial ideas explored</strong> · ${
+        later.filter(x => seen.has(x)).length
+      } of 2 further perspectives explored`;
+  }
+  // Reveal the final reflection after both additional articles are explored
+  if (later.every(x => seen.has(x))) {
+    $("tension-card").classList.add("visible");
+	$("rag-reflection").classList.add("visible");
+  }
+}
+
+buttons.forEach(b =>
+  b.addEventListener("click", () => choose(b.dataset.id))
+);
+
+// Reveal the additional circles only when the continue button is clicked
+document.querySelector(".continue").addEventListener("click", revealLater);
+
+</script></body></html>
