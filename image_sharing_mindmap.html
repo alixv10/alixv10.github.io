@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#05060d">
+  <title>What Happens When You Share an Image?</title>
+  <style>
+    :root {
+      --night: #05060d;
+      --white: #f5f4ff;
+      --muted: #a8abc4;
+      --glow: #9aa7ff;
+      --discovered: #ffbd75;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--white);
+      background:
+        radial-gradient(ellipse at 50% 48%, rgba(37, 42, 83, .24), transparent 48%),
+        radial-gradient(ellipse at 15% 85%, rgba(32, 42, 83, .16), transparent 35%),
+        var(--night);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .sky {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      isolation: isolate;
+      overflow: hidden;
+    }
+    .sky::before, .sky::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, #fff 98%, transparent),
+        radial-gradient(1px 1px at 30% 70%, #c9d2ff 98%, transparent),
+        radial-gradient(1.5px 1.5px at 70% 35%, #fff 98%, transparent),
+        radial-gradient(1px 1px at 88% 80%, #d9dcff 98%, transparent),
+        radial-gradient(1px 1px at 52% 12%, #fff 98%, transparent);
+      background-size: 230px 210px, 310px 270px, 370px 330px, 280px 250px, 420px 390px;
+      opacity: .52;
+      animation: drift 90s linear infinite;
+    }
+    .sky::after { transform: scale(1.3); opacity: .25; animation-duration: 140s; animation-direction: reverse; }
+    @keyframes drift { to { transform: translate3d(2%, -2%, 0); } }
+
+    .intro {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: min(560px, 76vw);
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .intro h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      line-height: 1.45;
+      font-weight: 450;
+      letter-spacing: .015em;
+      text-wrap: balance;
+      text-shadow: 0 0 24px rgba(174, 183, 255, .22);
+    }
+    .intro p {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: .78rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .star {
+      --size: 9px;
+      position: absolute;
+      left: var(--x); top: var(--y);
+      z-index: 2;
+      width: calc(var(--size) * 3.5);
+      height: calc(var(--size) * 3.5);
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .star::before {
+      content: "";
+      width: var(--size); height: var(--size);
+      border-radius: 50%;
+      background: #f5f4ff;
+      box-shadow: 0 0 5px 2px rgba(226, 231, 255, .6), 0 0 18px 5px rgba(151, 167, 255, .38);
+      transition: background .25s, box-shadow .25s, transform .25s;
+      animation: twinkle 3.4s ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    .star::after {
+      content: "";
+      position: absolute;
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(190, 199, 255, .0);
+      transition: border-color .25s, transform .25s;
+    }
+    .star:hover::before, .star:focus-visible::before {
+      transform: scale(1.7);
+      box-shadow: 0 0 8px 4px rgba(226, 231, 255, .75), 0 0 26px 9px rgba(151, 167, 255, .55);
+    }
+    .star:focus-visible { outline: none; }
+    .star:focus-visible::after { border-color: rgba(190, 199, 255, .65); transform: scale(1.25); }
+    .star.discovered::before {
+      background: var(--discovered);
+      box-shadow: 0 0 7px 3px rgba(255, 189, 117, .68), 0 0 23px 8px rgba(255, 159, 91, .32);
+      animation: none;
+    }
+    @keyframes twinkle { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+
+    .hint {
+      position: absolute;
+      bottom: 22px; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(190, 194, 220, .55);
+      font-size: .72rem;
+      letter-spacing: .08em;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(1, 2, 9, .72);
+      backdrop-filter: blur(8px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .popup {
+      position: relative;
+      width: min(480px, 100%);
+      padding: clamp(28px, 5vw, 42px);
+      border: 1px solid rgba(177, 188, 255, .24);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(25, 29, 57, .98), rgba(11, 13, 29, .98));
+      box-shadow: 0 24px 90px rgba(0, 0, 0, .55), 0 0 50px rgba(105, 121, 255, .12);
+      animation: arrive .22s ease-out;
+    }
+    @keyframes arrive { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: #aebaff;
+      font-size: .7rem;
+      font-weight: 650;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+    .popup h2 {
+      margin: 0 34px 16px 0;
+      font-size: clamp(1.35rem, 4vw, 1.8rem);
+      font-weight: 550;
+      line-height: 1.25;
+    }
+    .popup .body {
+      margin: 0;
+      color: #d0d2e5;
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+    .close {
+      position: absolute;
+      top: 17px; right: 17px;
+      width: 36px; height: 36px;
+      border: 1px solid rgba(210, 216, 255, .2);
+      border-radius: 50%;
+      color: #e9eaff;
+      background: rgba(255,255,255,.05);
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+    .close:hover { background: rgba(255,255,255,.13); }
+    @media (max-width: 600px) {
+      .intro { width: 68vw; }
+      .intro h1 { font-size: 1.15rem; }
+      .intro p { font-size: .63rem; }
+      .star { --size: 7px; }
+      .hint { width: 90%; white-space: normal; line-height: 1.5; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="sky" aria-label="Interactive night sky exploring what can happen when an image is shared online">
+    <section class="intro">
+      <h1>Click around to discover what can happen when you share an image online</h1>
+      <p>Five possibilities · One shared image</p>
+    </section>
+
+    <button class="star" style="--x:17%;--y:27%;--delay:.3s" data-topic="altered" aria-label="Discover how an image can be altered"></button>
+    <button class="star" style="--x:77%;--y:19%;--size:8px;--delay:1.1s" data-topic="credit" aria-label="Discover what can happen to image credit"></button>
+    <button class="star" style="--x:87%;--y:60%;--delay:1.8s" data-topic="deleted" aria-label="Discover how an image can be deleted"></button>
+    <button class="star" style="--x:23%;--y:76%;--size:8px;--delay:.7s" data-topic="explain" aria-label="Discover how an image can help explain something"></button>
+    <button class="star" style="--x:70%;--y:82%;--delay:2.2s" data-topic="inspire" aria-label="Discover how an image can inspire new ideas"></button>
+
+    <div class="hint">Select a star to explore a possibility</div>
+  </main>
+
+  <div class="modal-backdrop" id="backdrop" role="presentation">
+    <section class="popup" role="dialog" aria-modal="true" aria-labelledby="popup-title" aria-describedby="popup-body">
+      <button class="close" id="close" aria-label="Close">×</button>
+      <p class="eyebrow" id="popup-eyebrow">A possibility</p>
+      <h2 id="popup-title"></h2>
+      <p class="body" id="popup-body"></p>
+    </section>
+  </div>
+
+  <script>
+    const discoveries = {
+      altered: {
+        eyebrow: "The image itself",
+        title: "Your image could be changed",
+        body: "Someone might make a tiny adjustment or a dramatic transformation. They could sharpen a blurry image, improve its colours, or correct a spelling mistake. They might also turn a serious photograph into a cartoon, change its meaning, or edit it in a way you would not agree with. An alteration is not automatically good or bad — context matters."
+      },
+      credit: {
+        eyebrow: "Who gets credit?",
+        title: "Credit could travel — or disappear",
+        body: "Your image might be shared with your name and a link back to the original source. Its credit could also be stripped away, leaving it unattributed. Or someone else might claim they created it and receive recognition for work that was not theirs. Sharing can make an image travel far beyond the context where its creator is known."
+      },
+      deleted: {
+        eyebrow: "Control and ownership",
+        title: "Your image could be removed",
+        body: "If you post an image on a platform you do not control, the people or organization running that platform may be able to remove it. It could disappear because of a moderation decision, a policy change, a report, or the platform itself shutting down. Once you share something elsewhere, you may not have the final say over whether it stays there."
+      },
+      explain: {
+        eyebrow: "Learning and understanding",
+        title: "Your image could help explain something",
+        body: "Someone might use your image to make a confusing, unfamiliar, or sensitive topic easier to understand. In a classroom, for example, a teacher could use it as a starting point for a thoughtful explanation or discussion. Your image may become useful to people and in situations you never expected."
+      },
+      inspire: {
+        eyebrow: "Unexpected connections",
+        title: "Your image could spark something new",
+        body: "Someone might take the idea or context around your image in a new direction. It could inspire a teacher to create a spin-off activity for their students, help a class see a topic from another perspective, or prompt you to make something new yourself. Sharing can create connections and possibilities that the original creator could not have planned."
+      }
+    };
+
+    const stars = document.querySelectorAll(".star");
+    const backdrop = document.getElementById("backdrop");
+    const closeButton = document.getElementById("close");
+    const title = document.getElementById("popup-title");
+    const body = document.getElementById("popup-body");
+    const eyebrow = document.getElementById("popup-eyebrow");
+    let previouslyFocused = null;
+
+    function openDiscovery(star) {
+      const item = discoveries[star.dataset.topic];
+      if (!item) return;
+      previouslyFocused = star;
+      eyebrow.textContent = item.eyebrow;
+      title.textContent = item.title;
+      body.textContent = item.body;
+      backdrop.classList.add("open");
+      star.classList.add("discovered");
+      closeButton.focus();
+    }
+
+    function closeDiscovery() {
+      backdrop.classList.remove("open");
+      if (previouslyFocused) previouslyFocused.focus();
+    }
+
+    stars.forEach(star => {
+      star.addEventListener("click", () => openDiscovery(star));
+    });
+    closeButton.addEventListener("click", closeDiscovery);
+    backdrop.addEventListener("click", event => {
+      if (event.target === backdrop) closeDiscovery();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && backdrop.classList.contains("open")) closeDiscovery();
+    });
+  </script>
+</body>
+</html>
